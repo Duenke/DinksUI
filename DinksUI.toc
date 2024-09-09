@@ -1,0 +1,11 @@
+# Interface: 40000
+## Title: DinksUI
+## Notes: My custom UI hiding addon.
+## Author: halfByteMedic
+## Version: 0.1
+## SavedVariables: DinksUIDB
+## IconTexture: Interface\ICONS\Ability_mage_greaterinvisibility
+
+embeds.xml
+
+DinksUI.lua
