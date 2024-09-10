@@ -13,8 +13,7 @@ local RegisterAttributeDriver = RegisterAttributeDriver
 local ReloadUI = ReloadUI
 local UnitExists = UnitExists
 local UnregisterAttributeDriver = UnregisterAttributeDriver
-
--- Need to store the original `ObjectiveTrackerFrame:Show()` method and override it below.
+-- Need to store the original `ObjectiveTrackerFrame.Show` method and override it below.
 local OriginalObjectiveTrackerFrameShow = _G["ObjectiveTrackerFrame"].Show
 
 -- An AceConfig schema options object.
@@ -115,8 +114,8 @@ end
 function DinksUI:OnDisable()
 	self:UnregisterChatCommand("dinksui")
 	self:UnregisterAllFrames()
-	EventRegistry:RegisterCallback("EditMode.Enter", self)
-	EventRegistry:RegisterCallback("EditMode.Exit", self)
+	EventRegistry:UnregisterCallback("EditMode.Enter", self)
+	EventRegistry:UnregisterCallback("EditMode.Exit", self)
 end
 
 ------------------------------------------
@@ -128,7 +127,7 @@ end
 ------------------------------------------
 
 -- Returns the value associated with `options.args` properties.
--- Since the "AceDB" is set up and populated in "DinksUI:OnInitialize",
+-- Since the "AceDB" is set up and populated in "DinksUI.OnInitialize",
 --   we immediately start interfacing with `self.db` instead of the values stored in `options.args`.
 function DinksUI:GetValue(info)
 	return self.db.profile[info[#info]]
@@ -208,7 +207,7 @@ function DinksUI:Register(frameKey, conditionalMacro)
 	end
 end
 
--- Wrapper on `DinksUI:Register` that only acts if the current spec even has stances.
+-- Wrapper on `DinksUI.Register` that only acts if the current spec even has stances.
 --   Otherwise, you will get a "shadow StanceBar".
 function DinksUI:RegisterStance(frameKey, conditionalMacro)
 	if GetShapeshiftFormInfo(1) then
@@ -216,7 +215,7 @@ function DinksUI:RegisterStance(frameKey, conditionalMacro)
 	end
 end
 
--- Wrapper on `DinksUI:Register` that also overrides `OriginalObjectiveTrackerFrameShow`.
+-- Wrapper on `DinksUI.Register` that also overrides `OriginalObjectiveTrackerFrameShow`.
 --   Various other events will cause the frame to flicker between show and hide.
 --   This will prevent any other event from calling `OriginalObjectiveTrackerFrameShow`.
 --   ...I have no idea why DinksUI is caller "100", but it is what it is.
