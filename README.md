@@ -15,7 +15,7 @@ DinksUI is a World of Warcraft addon designed to enhance your gameplay experienc
 
 ## Installation
 
-1. Download the latest version of DinksUI from the [releases](https://github.com/your-username/DinksUI/releases) page.
+1. Download the latest version of DinksUI from the [releases](https://github.com/Duenke/DinksUI/releases) page.
 2. Extract the downloaded file into your World of Warcraft `_retail_/Interface/AddOns` directory.
 3. Restart World of Warcraft to load the addon.
 
@@ -27,7 +27,7 @@ DinksUI is a World of Warcraft addon designed to enhance your gameplay experienc
 
 ## Contributing
 
-Contributions to DinksUI are welcome! If you encounter any issues or have suggestions for improvements, please open an issue on the [GitHub repository](https://github.com/your-username/DinksUI/issues).
+Contributions to DinksUI are welcome! If you encounter any issues or have suggestions for improvements, please open an issue on the [GitHub repository](https://github.com/Duenke/DinksUI/issues).
 
 ## License
 
