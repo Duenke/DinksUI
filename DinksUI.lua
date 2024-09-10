@@ -52,6 +52,7 @@ local options = {
 		buffFrame = { type = "input", name = "BuffFrame", desc = "BuffFrame", width = "full", order = 23 },
 		debuffFrame = { type = "input", name = "DebuffFrame", desc = "DebuffFrame", width = "full", order = 24 },
 		experienceBar = { type = "input", name = "ExperienceBar", desc = "MainStatusTrackingBarContainer", width = "full", order = 25 },
+		skyRidingBar = { type = "input", name = "SkyRidingBar", desc = "UIWidgetPowerBarContainerFrame", width = "full", order = 26 },
 
 		bottomReload1 = { type = "description", name = "You will need to reload after confirming changes.", fontSize = "medium", order = 98 },
 		bottomReload2 = { type = "execute", name = "Reload UI", func = function() ReloadUI() end, order = 99 },
@@ -82,6 +83,7 @@ local defaults = {
 		buffFrame = "",
 		debuffFrame = "",
 		experienceBar = "",
+		skyRidingBar = "",
 	},
 }
 
@@ -169,6 +171,7 @@ function DinksUI:RegisterAllFrames()
 	self:Register(frames.buffFrame.desc, conditionals.buffFrame)
 	self:Register(frames.debuffFrame.desc, conditionals.debuffFrame)
 	self:Register(frames.experienceBar.desc, conditionals.experienceBar)
+	self:Register(frames.skyRidingBar.desc, conditionals.skyRidingBar)
 end
 
 -- Remember to also add new frames here as well.
@@ -196,6 +199,7 @@ function DinksUI:UnregisterAllFrames()
 	self:Unregister(frames.buffFrame.desc, conditionals.buffFrame)
 	self:Unregister(frames.debuffFrame.desc, conditionals.debuffFrame)
 	self:Unregister(frames.experienceBar.desc, conditionals.experienceBar)
+	self:Unregister(frames.skyRidingBar.desc, conditionals.skyRidingBar)
 end
 
 function DinksUI:Register(frameKey, conditionalMacro)
