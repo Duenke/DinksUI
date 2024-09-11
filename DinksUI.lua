@@ -50,8 +50,7 @@ local options = {
 		buffFrame = { type = "input", name = "BuffFrame", desc = "BuffFrame", width = "full", order = 23 },
 		debuffFrame = { type = "input", name = "DebuffFrame", desc = "DebuffFrame", width = "full", order = 24 },
 		experienceBar = { type = "input", name = "ExperienceBar", desc = "MainStatusTrackingBarContainer", width = "full", order = 25 },
-		-- Causes issues with other frames while in combat.
-		-- skyRidingBar = { type = "input", name = "SkyRidingBar", desc = "UIWidgetPowerBarContainerFrame", width = "full", order = 26 },
+		skyRidingBar = { type = "input", name = "SkyRidingBar", desc = "UIWidgetPowerBarContainerFrame", width = "full", order = 26 },
 
 		bottomReload1 = { type = "description", name = "You will need to reload after confirming changes.", fontSize = "medium", order = 98 },
 		bottomReload2 = { type = "execute", name = "Reload UI", func = function() ReloadUI() end, order = 99 },
@@ -82,7 +81,7 @@ local defaults = {
 		buffFrame = "",
 		debuffFrame = "",
 		experienceBar = "[vehicleui] hide; [mod:ctrl][mod:alt][combat] show; hide",
-		-- skyRidingBar = "",
+		skyRidingBar = "[vehicleui] hide; [mod:ctrl][mod:alt][combat] show; hide",
 	},
 }
 
@@ -170,7 +169,7 @@ function DinksUI:RegisterAllFrames()
 	self:Register(frames.buffFrame.desc, conditionals.buffFrame)
 	self:Register(frames.debuffFrame.desc, conditionals.debuffFrame)
 	self:Register(frames.experienceBar.desc, conditionals.experienceBar)
-	-- -- self:Register(frames.skyRidingBar.desc, conditionals.skyRidingBar)
+	self:Register(frames.skyRidingBar.desc, conditionals.skyRidingBar)
 end
 
 -- Remember to also add new frames here as well.
@@ -198,7 +197,7 @@ function DinksUI:UnregisterAllFrames()
 	self:Unregister(frames.buffFrame.desc, conditionals.buffFrame)
 	self:Unregister(frames.debuffFrame.desc, conditionals.debuffFrame)
 	self:Unregister(frames.experienceBar.desc, conditionals.experienceBar)
-	-- -- self:Unregister(frames.skyRidingBar.desc, conditionals.skyRidingBar)
+	self:Unregister(frames.skyRidingBar.desc, conditionals.skyRidingBar)
 end
 
 function DinksUI:Register(frameKey, conditionalMacro)
@@ -222,13 +221,15 @@ end
 function DinksUI:RegisterObjective(frameKey, conditionalMacro)
 	self:Register(frameKey, conditionalMacro)
 
-	_G[frameKey].Show = function(self, ...)
-		local stack = debugstack(2, 1, 0)
-		local caller = stack:match("([^:]+): in function")
-		if caller == "100" then
-			return OriginalObjectiveTrackerFrameShow(self, ...)
-		end
-	end
+	-- So this is the culprit. Somehow, it's causing issues with other frames during combat...
+	-- local og = _G[frameKey].Show
+	-- _G[frameKey].Show = function(self, ...)
+	-- 	local stack = debugstack(2, 1, 0)
+	-- 	local caller = stack:match("([^:]+): in function")
+	-- 	if caller == "100" then
+	-- 		return og(self, ...)
+	-- 	end
+	-- end
 end
 
 function DinksUI:Unregister(frameKey, conditionalMacro)
@@ -245,7 +246,8 @@ function DinksUI:UnregisterStance(frameKey, conditionalMacro)
 end
 
 function DinksUI:UnregisterObjective(frameKey, conditionalMacro)
-	_G[frameKey].Show = OriginalObjectiveTrackerFrameShow
+	-- So this is the culprit. Somehow, it's causing issues with other frames during combat...
+	-- _G[frameKey].Show = OriginalObjectiveTrackerFrameShow
 	self:Unregister(frameKey, conditionalMacro)
 end
 
