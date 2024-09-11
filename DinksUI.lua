@@ -9,12 +9,11 @@ local _G = _G
 local EventRegistry = EventRegistry
 local GetShapeshiftFormInfo = GetShapeshiftFormInfo
 local OpenToCategory = Settings.OpenToCategory
+local OriginalObjectiveTrackerFrameShow = _G["ObjectiveTrackerFrame"].Show
 local RegisterAttributeDriver = RegisterAttributeDriver
 local ReloadUI = ReloadUI
 local UnitExists = UnitExists
 local UnregisterAttributeDriver = UnregisterAttributeDriver
--- Need to store the original `ObjectiveTrackerFrame.Show` method and override it below.
-local OriginalObjectiveTrackerFrameShow = _G["ObjectiveTrackerFrame"].Show
 
 -- An AceConfig schema options object.
 local options = {
@@ -51,7 +50,8 @@ local options = {
 		buffFrame = { type = "input", name = "BuffFrame", desc = "BuffFrame", width = "full", order = 23 },
 		debuffFrame = { type = "input", name = "DebuffFrame", desc = "DebuffFrame", width = "full", order = 24 },
 		experienceBar = { type = "input", name = "ExperienceBar", desc = "MainStatusTrackingBarContainer", width = "full", order = 25 },
-		skyRidingBar = { type = "input", name = "SkyRidingBar", desc = "UIWidgetPowerBarContainerFrame", width = "full", order = 26 },
+		-- Causes issues with other frames while in combat.
+		-- skyRidingBar = { type = "input", name = "SkyRidingBar", desc = "UIWidgetPowerBarContainerFrame", width = "full", order = 26 },
 
 		bottomReload1 = { type = "description", name = "You will need to reload after confirming changes.", fontSize = "medium", order = 98 },
 		bottomReload2 = { type = "execute", name = "Reload UI", func = function() ReloadUI() end, order = 99 },
@@ -81,8 +81,8 @@ local defaults = {
 		microMenuContainer = "[mod:ctrl] show; hide",
 		buffFrame = "",
 		debuffFrame = "",
-		experienceBar = "",
-		skyRidingBar = "",
+		experienceBar = "[vehicleui] hide; [mod:ctrl][mod:alt][combat] show; hide",
+		-- skyRidingBar = "",
 	},
 }
 
@@ -128,7 +128,7 @@ end
 
 -- Returns the value associated with `options.args` properties.
 -- Since the "AceDB" is set up and populated in "DinksUI.OnInitialize",
---   we immediately start interfacing with `self.db` instead of the values stored in `options.args`.
+-- we immediately start interfacing with `self.db` instead of the values stored in `options.args`.
 function DinksUI:GetValue(info)
 	return self.db.profile[info[#info]]
 end
@@ -170,7 +170,7 @@ function DinksUI:RegisterAllFrames()
 	self:Register(frames.buffFrame.desc, conditionals.buffFrame)
 	self:Register(frames.debuffFrame.desc, conditionals.debuffFrame)
 	self:Register(frames.experienceBar.desc, conditionals.experienceBar)
-	self:Register(frames.skyRidingBar.desc, conditionals.skyRidingBar)
+	-- -- self:Register(frames.skyRidingBar.desc, conditionals.skyRidingBar)
 end
 
 -- Remember to also add new frames here as well.
@@ -198,7 +198,7 @@ function DinksUI:UnregisterAllFrames()
 	self:Unregister(frames.buffFrame.desc, conditionals.buffFrame)
 	self:Unregister(frames.debuffFrame.desc, conditionals.debuffFrame)
 	self:Unregister(frames.experienceBar.desc, conditionals.experienceBar)
-	self:Unregister(frames.skyRidingBar.desc, conditionals.skyRidingBar)
+	-- -- self:Unregister(frames.skyRidingBar.desc, conditionals.skyRidingBar)
 end
 
 function DinksUI:Register(frameKey, conditionalMacro)
@@ -208,17 +208,17 @@ function DinksUI:Register(frameKey, conditionalMacro)
 end
 
 -- Wrapper on `DinksUI.Register` that only acts if the current spec even has stances.
---   Otherwise, you will get a "shadow StanceBar".
+-- Otherwise, you will get a "shadow StanceBar".
 function DinksUI:RegisterStance(frameKey, conditionalMacro)
 	if GetShapeshiftFormInfo(1) then
 		self:Register(frameKey, conditionalMacro)
 	end
 end
 
--- Wrapper on `DinksUI.Register` that also overrides `OriginalObjectiveTrackerFrameShow`.
---   Various other events will cause the frame to flicker between show and hide.
---   This will prevent any other event from calling `OriginalObjectiveTrackerFrameShow`.
---   ...I have no idea why DinksUI is caller "100", but it is what it is.
+-- Wrapper on `DinksUI.Register` that also overrides `ObjectiveTrackerFrame.Show`.
+-- Various events would cause the frame to flicker between show and hide.
+-- This will prevent any other event from calling `OriginalObjectiveTrackerFrameShow`.
+-- ...I have no idea why DinksUI is caller "100", but it is what it is.
 function DinksUI:RegisterObjective(frameKey, conditionalMacro)
 	self:Register(frameKey, conditionalMacro)
 
@@ -228,13 +228,6 @@ function DinksUI:RegisterObjective(frameKey, conditionalMacro)
 		if caller == "100" then
 			return OriginalObjectiveTrackerFrameShow(self, ...)
 		end
-	end
-end
-
-function DinksUI:RegisterChat(frameKey, conditionalMacro)
-	for i = 1, NUM_CHAT_WINDOWS do
-		local chatFrame = _G[frameKey .. i]
-		self:Register(chatFrame:GetName(), conditionalMacro)
 	end
 end
 
