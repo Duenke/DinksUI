@@ -9,6 +9,7 @@ local _G = _G
 local CreateFrame = CreateFrame
 local EventRegistry = EventRegistry
 local OpenToCategory = Settings.OpenToCategory
+local NUM_CHAT_WINDOWS = NUM_CHAT_WINDOWS
 local RegisterAttributeDriver = RegisterAttributeDriver
 local ReloadUI = ReloadUI
 local UIParent = UIParent
