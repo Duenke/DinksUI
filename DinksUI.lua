@@ -30,8 +30,8 @@ local options = {
 		desc1 = { type = "description", name = "Supply each frame below with a macro conditional of your chosing or none.", fontSize = "medium", order = 0 },
 		desc2 = { type = "description", name = "Ex 1: MainMenuBar: [vehicleui] hide; [mod:ctrl][mod:alt][combat] show; hide", fontSize = "medium", order = 1 },
 		desc3 = { type = "description", name = "Ex 2: PetActionBar: [mod:ctrl,@pet,exists] show; hide", fontSize = "medium", order = 2 },
-		topReload1 = { type = "description", name = "You will need to reload after confirming changes.", fontSize = "medium", order = 3 },
-		topReload2 = { type = "execute", name = "Reload UI", order = 4, func = ReloadUI },
+		reloadTxt = { type = "description", name = "You will need to reload after confirming changes.", fontSize = "medium", order = 3 },
+		reloadBtn = { type = "execute", name = "Reload UI", order = 4, func = ReloadUI },
 
 		actionBar1 = { type = "input", name = "ActionBar1", desc = "MainMenuBar", width = "full", order = 5 },
 		actionBar2 = { type = "input", name = "ActionBar2", desc = "MultiBarBottomLeft", width = "full", order = 6 },
@@ -57,8 +57,9 @@ local options = {
 		experienceBar = { type = "input", name = "ExperienceBar", desc = "MainStatusTrackingBarContainer", width = "full", order = 26 },
 		skyRidingBar = { type = "input", name = "SkyRidingBar", desc = "UIWidgetPowerBarContainerFrame", width = "full", order = 27 },
 
-		bottomReload1 = { type = "description", name = "You will need to reload after confirming changes.", fontSize = "medium", order = 98 },
-		bottomReload2 = { type = "execute", name = "Reload UI", func = function() ReloadUI() end, order = 99 },
+		slashCmdTxt = { type = "description", name = "You can use '/dinksui show' and /dinksui hide' to temporarily toggle visibility. You can even make a macro!", fontSize = "medium", order = 97 },
+		bottomReloadTxt = { type = "description", name = "You will need to reload after confirming changes.", fontSize = "medium", order = 98 },
+		bottomReloadBtn = { type = "execute", name = "Reload UI", func = function() ReloadUI() end, order = 99 },
 	},
 }
 
@@ -120,7 +121,7 @@ end
 function DinksUI:OnDisable()
 	self:UnregisterChatCommand("dui")
 	self:UnregisterChatCommand("dinksui")
-	self:UnregisterAllFrames()
+	self:HandleExitingWorld()
 	EventRegistry:UnregisterCallback("EditMode.Enter", self)
 	EventRegistry:UnregisterCallback("EditMode.Exit", self)
 end
@@ -141,10 +142,18 @@ function DinksUI:HandleEnteringWorld()
 	self:RegisterAllFrames()
 end
 
+function DinksUI:HandleExitingWorld()
+	self:UnregisterAllFrames()
+	FrameWrapperTable = {}
+end
+
 function DinksUI:HandleSlashCommand(command)
 	local cmd = command:trim():lower()
 	if not cmd or cmd == "" then
 		OpenToCategory(self.optionsFrame.name)
+	elseif cmd == "h" or cmd == "help" then
+		self:Print("type '/dinksui show' to temporarily show all frames.")
+		self:Print("type '/dinksui hide' to again hide all frames.")
 	elseif cmd == "show" then
 		self:UnregisterAllFrames()
 	elseif cmd == "hide" then
@@ -220,11 +229,12 @@ end
 
 function DinksUI:RegisterWrapper(frameKey, conditionalMacro)
 	if string.len(string.trim(conditionalMacro)) > 1 then
-		FrameWrapperTable[frameKey] = {}
-		FrameWrapperTable[frameKey]["newPartent"] = CreateFrame("Frame", nil, UIParent, "SecureHandlerStateTemplate")
-		FrameWrapperTable[frameKey]["oldParent"] = _G[frameKey]:GetParent()
-		_G[frameKey]:SetParent(FrameWrapperTable[frameKey]["newPartent"])
-		RegisterAttributeDriver(FrameWrapperTable[frameKey]["newPartent"], "state-visibility", conditionalMacro)
+		local oldParent = _G[frameKey]:GetParent()
+		local newParent = CreateFrame("Frame", nil, UIParent, "SecureHandlerStateTemplate")
+
+		_G[frameKey]:SetParent(newParent)
+		FrameWrapperTable[frameKey] = oldParent
+		RegisterAttributeDriver(newParent, "state-visibility", conditionalMacro)
 	end
 end
 
@@ -248,7 +258,7 @@ end
 
 function DinksUI:UnregisterWrapper(frameKey, conditionalMacro)
 	if string.len(string.trim(conditionalMacro)) > 1 then
-		_G[frameKey]:SetParent(FrameWrapperTable[frameKey]["oldParent"])
+		_G[frameKey]:SetParent(FrameWrapperTable[frameKey])
 	end
 end
 
