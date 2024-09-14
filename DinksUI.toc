@@ -2,7 +2,7 @@
 ## Title: Dinks' Immersive UI
 ## Notes: My custom UI hiding addon.
 ## Author: Duenke
-## Version: 1.0.0
+## Version: 1.0.1
 ## SavedVariables: DinksUIDB
 ## IconTexture: Interface\ICONS\Ability_mage_greaterinvisibility
 
