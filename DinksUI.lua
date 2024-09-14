@@ -46,7 +46,7 @@ local options = {
 		targetFrame = { type = "input", name = "TargetFrame", desc = "TargetFrame", width = "full", order = 16 },
 		focusFrame = { type = "input", name = "FocusFrame", desc = "FocusFrame", width = "full", order = 17 },
 		petFrame = { type = "input", name = "PetFrame", desc = "PetFrame", width = "full", order = 18 },
-		objectiveTrackerFrame = { type = "input", name = "ObjectiveTrackerFrame (mostly works)", desc = "ObjectiveTrackerFrame", width = "full", order = 19 },
+		objectiveTrackerFrame = { type = "input", name = "ObjectiveTrackerFrame", desc = "ObjectiveTrackerFrame", width = "full", order = 19 },
 		minimap = { type = "input", name = "Minimap", desc = "Minimap", width = "full", order = 20 },
 		bagsBar = { type = "input", name = "BagsBar", desc = "BagsBar", width = "full", order = 21 },
 		microMenuContainer = { type = "input", name = "MicroMenuContainer", desc = "MicroMenuContainer", width = "full", order = 22 },
@@ -54,6 +54,7 @@ local options = {
 		debuffFrame = { type = "input", name = "DebuffFrame", desc = "DebuffFrame", width = "full", order = 24 },
 		experienceBar = { type = "input", name = "ExperienceBar", desc = "MainStatusTrackingBarContainer", width = "full", order = 25 },
 		skyRidingBar = { type = "input", name = "SkyRidingBar", desc = "UIWidgetPowerBarContainerFrame", width = "full", order = 26 },
+		chatFrame = { type = "input", name = "ChatFrames", desc = "ChatFrame", width = "full", order = 26 },
 
 		bottomReload1 = { type = "description", name = "You will need to reload after confirming changes.", fontSize = "medium", order = 98 },
 		bottomReload2 = { type = "execute", name = "Reload UI", func = function() ReloadUI() end, order = 99 },
@@ -85,6 +86,7 @@ local defaults = {
 		debuffFrame = "",
 		experienceBar = "[vehicleui] hide; [mod:ctrl][mod:alt][combat] show; hide",
 		skyRidingBar = "[vehicleui] hide; [mod:ctrl][mod:alt][combat] show; hide",
+		chatFrame = "",
 	},
 }
 
@@ -177,6 +179,7 @@ function DinksUI:RegisterAllFrames()
 	self:Register(frames.debuffFrame.desc, conditionals.debuffFrame)
 	self:Register(frames.experienceBar.desc, conditionals.experienceBar)
 	self:Register(frames.skyRidingBar.desc, conditionals.skyRidingBar)
+	self:RegisterChat(frames.chatFrame.desc, conditionals.chatFrame)
 end
 
 -- Remember to also add new frames here as well.
@@ -205,6 +208,7 @@ function DinksUI:UnregisterAllFrames()
 	self:Unregister(frames.debuffFrame.desc, conditionals.debuffFrame)
 	self:Unregister(frames.experienceBar.desc, conditionals.experienceBar)
 	self:Unregister(frames.skyRidingBar.desc, conditionals.skyRidingBar)
+	self:UnregisterChat(frames.chatFrame.desc, conditionals.chatFrame)
 end
 
 function DinksUI:Register(frameKey, conditionalMacro)
@@ -223,6 +227,17 @@ function DinksUI:RegisterWrapper(frameKey, conditionalMacro)
 	end
 end
 
+function DinksUI:RegisterChat(frameKey, conditionalMacro)
+	if string.len(string.trim(conditionalMacro)) > 1 then
+		for i = 1, NUM_CHAT_WINDOWS do
+			self:RegisterWrapper(frameKey .. i, conditionalMacro)
+		end
+
+		self:RegisterWrapper("GeneralDockManager", conditionalMacro)
+		self:RegisterWrapper("QuickJoinToastButton", conditionalMacro)
+	end
+end
+
 function DinksUI:Unregister(frameKey, conditionalMacro)
 	if string.len(string.trim(conditionalMacro)) > 1 then
 		UnregisterAttributeDriver(_G[frameKey], "state-visibility")
@@ -233,6 +248,17 @@ end
 function DinksUI:UnregisterWrapper(frameKey, conditionalMacro)
 	if string.len(string.trim(conditionalMacro)) > 1 then
 		_G[frameKey]:SetParent(FrameWrapperTable[frameKey]["oldParent"])
+	end
+end
+
+function DinksUI:UnregisterChat(frameKey, conditionalMacro)
+	if string.len(string.trim(conditionalMacro)) > 1 then
+		for i = 1, NUM_CHAT_WINDOWS do
+			self:UnregisterWrapper(frameKey .. i, conditionalMacro)
+		end
+
+		self:UnregisterWrapper("GeneralDockManager", conditionalMacro)
+		self:UnregisterWrapper("QuickJoinToastButton", conditionalMacro)
 	end
 end
 
