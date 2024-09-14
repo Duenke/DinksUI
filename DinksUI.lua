@@ -8,16 +8,15 @@ DinksUI = LibStub("AceAddon-3.0"):NewAddon("DinksUI", "AceConsole-3.0", "AceEven
 local _G = _G
 local CreateFrame = CreateFrame
 local EventRegistry = EventRegistry
-local GetShapeshiftFormInfo = GetShapeshiftFormInfo
 local OpenToCategory = Settings.OpenToCategory
 local RegisterAttributeDriver = RegisterAttributeDriver
 local ReloadUI = ReloadUI
 local UIParent = UIParent
-local UnitExists = UnitExists
 local UnregisterAttributeDriver = UnregisterAttributeDriver
 
--- Need to wrap the `ObjectiveTrackerFrame`, because its doesn't hide well on it's own.
-local ObjectiveWrapperFrame = CreateFrame("Frame", nil, UIParent, "SecureHandlerStateTemplate")
+-- Some frames don't handle it well when you call their `Hide` and `Show` methods.
+-- For those, we will wrap them in new frames that will hide/show just fine.
+local FrameWrapperTable = {}
 
 -- An AceConfig schema options object.
 local options = {
@@ -108,17 +107,17 @@ function DinksUI:OnInitialize()
 end
 
 function DinksUI:OnEnable()
-	self:RegisterAllFrames()
 	self:RegisterChatCommand("dui", "HandleSlashCommand")
-	self:RegisterEvent("PLAYER_ENTERING_WORLD", "HandleEnteringWorld")
+	self:RegisterChatCommand("dinksui", "HandleSlashCommand")
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "RegisterAllFrames")
 	EventRegistry:RegisterCallback("EditMode.Enter", self.UnregisterAllFrames, self)
 	EventRegistry:RegisterCallback("EditMode.Exit", self.RegisterAllFrames, self)
 end
 
 function DinksUI:OnDisable()
-	self:UnregisterAllFrames()
 	self:UnregisterChatCommand("dui")
-	_G["ObjectiveTrackerFrame"]:SetParent(UIParent)
+	self:UnregisterChatCommand("dinksui")
+	self:UnregisterAllFrames()
 	EventRegistry:UnregisterCallback("EditMode.Enter", self)
 	EventRegistry:UnregisterCallback("EditMode.Exit", self)
 end
@@ -155,10 +154,6 @@ function DinksUI:HandleSlashCommand(command)
 	end
 end
 
-function DinksUI:HandleEnteringWorld()
-	_G["ObjectiveTrackerFrame"]:SetParent(ObjectiveWrapperFrame)
-end
-
 -- This is the main function. This is where new frames can be added.
 function DinksUI:RegisterAllFrames()
 	local frames = options.args
@@ -172,12 +167,12 @@ function DinksUI:RegisterAllFrames()
 	self:Register(frames.actionBar7.desc, conditionals.actionBar7)
 	self:Register(frames.actionBar8.desc, conditionals.actionBar8)
 	self:Register(frames.petActionBar.desc, conditionals.petActionBar)
-	self:RegisterStance(frames.stanceBar.desc, conditionals.stanceBar)
+	self:RegisterWrapper(frames.stanceBar.desc, conditionals.stanceBar)
 	self:Register(frames.playerFrame.desc, conditionals.playerFrame)
-	self:Register(frames.targetFrame.desc, conditionals.targetFrame)
+	self:RegisterWrapper(frames.targetFrame.desc, conditionals.targetFrame)
 	self:Register(frames.focusFrame.desc, conditionals.focusFrame)
 	self:Register(frames.petFrame.desc, conditionals.petFrame)
-	self:RegisterObjective(conditionals.objectiveTrackerFrame)
+	self:RegisterWrapper(frames.objectiveTrackerFrame.desc, conditionals.objectiveTrackerFrame)
 	self:Register(frames.minimap.desc, conditionals.minimap)
 	self:Register(frames.bagsBar.desc, conditionals.bagsBar)
 	self:Register(frames.microMenuContainer.desc, conditionals.microMenuContainer)
@@ -200,12 +195,12 @@ function DinksUI:UnregisterAllFrames()
 	self:Unregister(frames.actionBar7.desc, conditionals.actionBar7)
 	self:Unregister(frames.actionBar8.desc, conditionals.actionBar8)
 	self:Unregister(frames.petActionBar.desc, conditionals.petActionBar)
-	self:UnregisterStance(frames.stanceBar.desc, conditionals.stanceBar)
+	self:UnregisterWrapper(frames.stanceBar.desc, conditionals.stanceBar)
 	self:Unregister(frames.playerFrame.desc, conditionals.playerFrame)
-	self:UnregisterTarget(frames.targetFrame.desc, conditionals.targetFrame)
+	self:UnregisterWrapper(frames.targetFrame.desc, conditionals.targetFrame)
 	self:Unregister(frames.focusFrame.desc, conditionals.focusFrame)
 	self:Unregister(frames.petFrame.desc, conditionals.petFrame)
-	self:UnregisterObjective(conditionals.objectiveTrackerFrame)
+	self:UnregisterWrapper(frames.objectiveTrackerFrame.desc, conditionals.objectiveTrackerFrame)
 	self:Unregister(frames.minimap.desc, conditionals.minimap)
 	self:Unregister(frames.bagsBar.desc, conditionals.bagsBar)
 	self:Unregister(frames.microMenuContainer.desc, conditionals.microMenuContainer)
@@ -221,19 +216,13 @@ function DinksUI:Register(frameKey, conditionalMacro)
 	end
 end
 
--- Only acts if the current spec even has stances to prevent a "shadow StanceBar".
-function DinksUI:RegisterStance(frameKey, conditionalMacro)
-	if GetShapeshiftFormInfo(1) then
-		if string.len(string.trim(conditionalMacro)) > 1 then
-			RegisterAttributeDriver(_G[frameKey], "state-visibility", conditionalMacro)
-		end
-	end
-end
-
--- Acts on the `ObjectiveWrapperFrame` instead of the `ObjectiveTrackerFrame`.
-function DinksUI:RegisterObjective(conditionalMacro)
+function DinksUI:RegisterWrapper(frameKey, conditionalMacro)
 	if string.len(string.trim(conditionalMacro)) > 1 then
-		RegisterAttributeDriver(ObjectiveWrapperFrame, "state-visibility", conditionalMacro)
+		FrameWrapperTable[frameKey] = {}
+		FrameWrapperTable[frameKey]["newPartent"] = CreateFrame("Frame", nil, UIParent, "SecureHandlerStateTemplate")
+		FrameWrapperTable[frameKey]["oldParent"] = _G[frameKey]:GetParent()
+		_G[frameKey]:SetParent(FrameWrapperTable[frameKey]["newPartent"])
+		RegisterAttributeDriver(FrameWrapperTable[frameKey]["newPartent"], "state-visibility", conditionalMacro)
 	end
 end
 
@@ -244,28 +233,9 @@ function DinksUI:Unregister(frameKey, conditionalMacro)
 	end
 end
 
-function DinksUI:UnregisterStance(frameKey, conditionalMacro)
-	if GetShapeshiftFormInfo(1) then
-		if string.len(string.trim(conditionalMacro)) > 1 then
-			UnregisterAttributeDriver(_G[frameKey], "state-visibility")
-			_G[frameKey]:Show()
-		end
-	end
-end
-
-function DinksUI:UnregisterObjective(conditionalMacro)
+function DinksUI:UnregisterWrapper(frameKey, conditionalMacro)
 	if string.len(string.trim(conditionalMacro)) > 1 then
-		UnregisterAttributeDriver(ObjectiveWrapperFrame, "state-visibility")
-		ObjectiveWrapperFrame:Show()
-	end
-end
-
-function DinksUI:UnregisterTarget(frameKey, conditionalMacro)
-	if string.len(string.trim(conditionalMacro)) > 1 then
-		UnregisterAttributeDriver(_G[frameKey], "state-visibility")
-		if UnitExists("target") then
-			_G[frameKey]:Show()
-		end
+		_G[frameKey]:SetParent(FrameWrapperTable[frameKey]["oldParent"])
 	end
 end
 
