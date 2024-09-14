@@ -109,7 +109,7 @@ end
 function DinksUI:OnEnable()
 	self:RegisterChatCommand("dui", "HandleSlashCommand")
 	self:RegisterChatCommand("dinksui", "HandleSlashCommand")
-	self:RegisterEvent("PLAYER_ENTERING_WORLD", "RegisterAllFrames")
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "HandleEnteringWorld")
 	EventRegistry:RegisterCallback("EditMode.Enter", self.UnregisterAllFrames, self)
 	EventRegistry:RegisterCallback("EditMode.Exit", self.RegisterAllFrames, self)
 end
@@ -130,15 +130,12 @@ end
 -- #region: local functions
 ------------------------------------------
 
--- Returns the value associated with `options.args` properties.
--- Since the "AceDB" is set up and populated in "DinksUI.OnInitialize",
--- we immediately start interfacing with `self.db` instead of the values stored in `options.args`.
-function DinksUI:GetValue(info)
-	return self.db.profile[info[#info]]
-end
-
-function DinksUI:SetValue(info, value)
-	self.db.profile[info[#info]] = value
+-- So, `PLAYER_ENTERING_WORLD` basically means "finished any loading screen".
+-- Because the UI is rebuilt every loading screen, we need to start all the work here.
+-- Yes, at this time, `HandleEnteringWorld` only calls `RegisterAllFrames`, but
+-- at some point it might do more...and I wanted to document all this here.
+function DinksUI:HandleEnteringWorld()
+	self:RegisterAllFrames()
 end
 
 function DinksUI:HandleSlashCommand(command)
@@ -237,6 +234,17 @@ function DinksUI:UnregisterWrapper(frameKey, conditionalMacro)
 	if string.len(string.trim(conditionalMacro)) > 1 then
 		_G[frameKey]:SetParent(FrameWrapperTable[frameKey]["oldParent"])
 	end
+end
+
+-- Returns the value associated with `options.args` properties.
+-- Since the "AceDB" is set up and populated in "DinksUI.OnInitialize",
+-- we immediately start interfacing with `self.db` instead of the values stored in `options.args`.
+function DinksUI:GetValue(info)
+	return self.db.profile[info[#info]]
+end
+
+function DinksUI:SetValue(info, value)
+	self.db.profile[info[#info]] = value
 end
 
 ------------------------------------------
