@@ -49,7 +49,7 @@ local options = {
 		petFrame = { type = "input", name = "PetFrame", desc = "PetFrame", width = "full", order = 18 },
 		objectiveTrackerFrame = { type = "input", name = "ObjectiveTrackerFrame", desc = "ObjectiveTrackerFrame", width = "full", order = 19 },
 		chatFrame = { type = "input", name = "ChatFrames", desc = "ChatFrame", width = "full", order = 20 },
-		minimap = { type = "input", name = "Minimap", desc = "Minimap", width = "full", order = 21 },
+		minimap = { type = "input", name = "Minimap", desc = "MinimapCluster", width = "full", order = 21 },
 		bagsBar = { type = "input", name = "BagsBar", desc = "BagsBar", width = "full", order = 22 },
 		microMenuContainer = { type = "input", name = "MicroMenuContainer", desc = "MicroMenuContainer", width = "full", order = 23 },
 		buffFrame = { type = "input", name = "BuffFrame", desc = "BuffFrame", width = "full", order = 24 },
@@ -179,8 +179,8 @@ function DinksUI:RegisterAllFrames()
 	self:RegisterWrapper(frames.stanceBar.desc, conditionals.stanceBar)
 	self:Register(frames.playerFrame.desc, conditionals.playerFrame)
 	self:RegisterWrapper(frames.targetFrame.desc, conditionals.targetFrame)
-	self:Register(frames.focusFrame.desc, conditionals.focusFrame)
-	self:Register(frames.petFrame.desc, conditionals.petFrame)
+	self:RegisterWrapper(frames.focusFrame.desc, conditionals.focusFrame)
+	self:RegisterWrapper(frames.petFrame.desc, conditionals.petFrame)
 	self:RegisterWrapper(frames.objectiveTrackerFrame.desc, conditionals.objectiveTrackerFrame)
 	self:Register(frames.minimap.desc, conditionals.minimap)
 	self:Register(frames.bagsBar.desc, conditionals.bagsBar)
@@ -208,8 +208,8 @@ function DinksUI:UnregisterAllFrames()
 	self:UnregisterWrapper(frames.stanceBar.desc, conditionals.stanceBar)
 	self:Unregister(frames.playerFrame.desc, conditionals.playerFrame)
 	self:UnregisterWrapper(frames.targetFrame.desc, conditionals.targetFrame)
-	self:Unregister(frames.focusFrame.desc, conditionals.focusFrame)
-	self:Unregister(frames.petFrame.desc, conditionals.petFrame)
+	self:UnregisterWrapper(frames.focusFrame.desc, conditionals.focusFrame)
+	self:UnregisterWrapper(frames.petFrame.desc, conditionals.petFrame)
 	self:UnregisterWrapper(frames.objectiveTrackerFrame.desc, conditionals.objectiveTrackerFrame)
 	self:Unregister(frames.minimap.desc, conditionals.minimap)
 	self:Unregister(frames.bagsBar.desc, conditionals.bagsBar)
