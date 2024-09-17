@@ -81,6 +81,7 @@ local defaults = {
 		focusFrame = "",
 		petFrame = "[mod:alt,@pet,exists][mod:ctrl,@pet,exists][combat] show; hide",
 		objectiveTrackerFrame = "[mod:ctrl][mod:alt,nocombat] show; hide",
+		chatFrame = "",
 		minimap = "",
 		bagsBar = "[mod:ctrl] show; hide",
 		microMenuContainer = "[mod:ctrl] show; hide",
@@ -88,7 +89,6 @@ local defaults = {
 		debuffFrame = "",
 		experienceBar = "[vehicleui] hide; [mod:ctrl][mod:alt][combat] show; hide",
 		skyRidingBar = "[vehicleui] hide; [mod:ctrl][mod:alt][combat] show; hide",
-		chatFrame = "",
 	},
 }
 
@@ -182,6 +182,7 @@ function DinksUI:RegisterAllFrames()
 	self:RegisterWrapper(frames.focusFrame.desc, conditionals.focusFrame)
 	self:RegisterWrapper(frames.petFrame.desc, conditionals.petFrame)
 	self:RegisterWrapper(frames.objectiveTrackerFrame.desc, conditionals.objectiveTrackerFrame)
+	self:RegisterChat(frames.chatFrame.desc, conditionals.chatFrame)
 	self:Register(frames.minimap.desc, conditionals.minimap)
 	self:Register(frames.bagsBar.desc, conditionals.bagsBar)
 	self:Register(frames.microMenuContainer.desc, conditionals.microMenuContainer)
@@ -189,7 +190,6 @@ function DinksUI:RegisterAllFrames()
 	self:Register(frames.debuffFrame.desc, conditionals.debuffFrame)
 	self:Register(frames.experienceBar.desc, conditionals.experienceBar)
 	self:Register(frames.skyRidingBar.desc, conditionals.skyRidingBar)
-	self:RegisterChat(frames.chatFrame.desc, conditionals.chatFrame)
 end
 
 -- Remember to also add new frames here as well.
@@ -211,6 +211,7 @@ function DinksUI:UnregisterAllFrames()
 	self:UnregisterWrapper(frames.focusFrame.desc, conditionals.focusFrame)
 	self:UnregisterWrapper(frames.petFrame.desc, conditionals.petFrame)
 	self:UnregisterWrapper(frames.objectiveTrackerFrame.desc, conditionals.objectiveTrackerFrame)
+	self:UnregisterChat(frames.chatFrame.desc, conditionals.chatFrame)
 	self:Unregister(frames.minimap.desc, conditionals.minimap)
 	self:Unregister(frames.bagsBar.desc, conditionals.bagsBar)
 	self:Unregister(frames.microMenuContainer.desc, conditionals.microMenuContainer)
@@ -218,7 +219,6 @@ function DinksUI:UnregisterAllFrames()
 	self:Unregister(frames.debuffFrame.desc, conditionals.debuffFrame)
 	self:Unregister(frames.experienceBar.desc, conditionals.experienceBar)
 	self:Unregister(frames.skyRidingBar.desc, conditionals.skyRidingBar)
-	self:UnregisterChat(frames.chatFrame.desc, conditionals.chatFrame)
 end
 
 function DinksUI:Register(frameKey, conditionalMacro)

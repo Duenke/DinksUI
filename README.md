@@ -15,7 +15,7 @@ Dinks' Immersive UI is a World of Warcraft addon designed to enhance your gamepl
 
 ## Installation
 
-1. Download the latest version from [CurseForge](https://legacy.curseforge.com/wow/addons/dinksui).
+1. Download the latest version from [CurseForge](https://www.curseforge.com/wow/addons/dinksui).
 2. Extract the downloaded file into your World of Warcraft `_retail_/Interface/AddOns` directory.
 3. Reload World of Warcraft to load the addon. (You no longer need to restart the WoW game client.)
 
