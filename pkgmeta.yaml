@@ -1,1 +1,1 @@
-package-as: @project-revision@
+package-as: @project-version@
