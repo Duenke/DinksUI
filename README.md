@@ -28,7 +28,9 @@ Dinks' Immersive UI is a World of Warcraft addon designed to enhance your gamepl
 
 ## Contributing
 
-Contributions to Dinks' Immersive UI are welcome! If you encounter any issues or have suggestions for improvements, please open an issue on the [GitHub repository](https://github.com/Duenke/DinksUI/issues). Please feel encouraged to submit a pull request of your own or even fork this project for personal use and learning!
+Contributions to Dinks' Immersive UI are welcome! If you encounter any issues or have suggestions for improvements, please open an issue on the [GitHub repository](https://github.com/Duenke/DinksUI/issues).
+
+See [Contributing](./Contributing.md) for more.
 
 ## License
 
