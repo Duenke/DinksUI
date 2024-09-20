@@ -247,7 +247,9 @@ end
 
 function DinksUI:Register(frameKey, conditionalMacro)
 	if string.len(string.trim(conditionalMacro)) > 1 then
-		local oldParent = _G[frameKey]:GetParent()
+		-- Save the original parent for `DinksUI.Unregister`.
+		-- If the frame was registered already and never unregistered, take the saved original parent.
+		local oldParent = FrameWrapperTable[frameKey] or _G[frameKey]:GetParent()
 		local newParent = CreateFrame("Frame", nil, UIParent, "SecureHandlerStateTemplate")
 
 		_G[frameKey]:SetParent(newParent)
@@ -266,6 +268,7 @@ function DinksUI:RegisterChat(frameKey, conditionalMacro)
 end
 
 function DinksUI:Unregister(frameKey)
+	-- If the frame was registered, then restore the original parent.
 	if FrameWrapperTable[frameKey] then
 		_G[frameKey]:SetParent(FrameWrapperTable[frameKey])
 		FrameWrapperTable[frameKey] = nil
@@ -273,10 +276,12 @@ function DinksUI:Unregister(frameKey)
 end
 
 function DinksUI:UnregisterChat(frameKey, conditionalMacro)
+	-- Because chat can have any number of windows, we need a more dynamic method.
 	for i = 1, NUM_CHAT_WINDOWS do
 		self:Unregister(frameKey .. i)
 	end
 
+	-- Chat kind of also includes those buttons to the left.
 	self:Unregister("GeneralDockManager")
 	self:Unregister("QuickJoinToastButton")
 end
