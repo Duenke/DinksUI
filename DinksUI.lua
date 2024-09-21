@@ -250,7 +250,7 @@ function DinksUI:Register(frameKey, conditionalMacro)
 		-- Save the original parent for `DinksUI.Unregister`.
 		-- If the frame was registered already and never unregistered, take the saved original parent.
 		local oldParent = FrameWrapperTable[frameKey] or _G[frameKey]:GetParent()
-		local newParent = CreateFrame("Frame", nil, UIParent, "SecureHandlerStateTemplate")
+		local newParent = self:CreateNewParentFrame()
 
 		_G[frameKey]:SetParent(newParent)
 		FrameWrapperTable[frameKey] = oldParent
@@ -258,11 +258,13 @@ function DinksUI:Register(frameKey, conditionalMacro)
 	end
 end
 
+-- Because chat can have any number of windows, we need a more dynamic method.
 function DinksUI:RegisterChat(frameKey, conditionalMacro)
 	for i = 1, NUM_CHAT_WINDOWS do
 		self:Register(frameKey .. i, conditionalMacro)
 	end
 
+	-- Chat kind of also includes those buttons to the left.
 	self:Register("GeneralDockManager", conditionalMacro)
 	self:Register("QuickJoinToastButton", conditionalMacro)
 end
@@ -276,12 +278,10 @@ function DinksUI:Unregister(frameKey)
 end
 
 function DinksUI:UnregisterChat(frameKey, conditionalMacro)
-	-- Because chat can have any number of windows, we need a more dynamic method.
 	for i = 1, NUM_CHAT_WINDOWS do
 		self:Unregister(frameKey .. i)
 	end
 
-	-- Chat kind of also includes those buttons to the left.
 	self:Unregister("GeneralDockManager")
 	self:Unregister("QuickJoinToastButton")
 end
@@ -295,6 +295,37 @@ end
 
 function DinksUI:SetValue(info, value)
 	self.db.profile[info[#info]] = value
+end
+
+function DinksUI:CreateNewParentFrame()
+	local newParent = CreateFrame("Frame", nil, UIParent, "SecureHandlerStateTemplate")
+	-- Set up fade-in and fade-out animations
+	local fadeIn = newParent:CreateAnimationGroup()
+	local fadeInAlpha = fadeIn:CreateAnimation("Alpha")
+	fadeInAlpha:SetFromAlpha(0)
+	fadeInAlpha:SetToAlpha(1)
+	fadeInAlpha:SetDuration(0.1)
+	fadeInAlpha:SetSmoothing("IN")
+
+	-- Fade-out animations don't seem to work with this method of hiding frames.
+	-- local fadeOut = newParent:CreateAnimationGroup()
+	-- local fadeOutAlpha = fadeOut:CreateAnimation("Alpha")
+	-- fadeOutAlpha:SetFromAlpha(1)
+	-- fadeOutAlpha:SetToAlpha(0)
+	-- fadeOutAlpha:SetDuration(0.5)
+	-- fadeOutAlpha:SetSmoothing("OUT")
+
+	newParent:SetScript("OnShow", function(self)
+		-- fadeOut:Stop()
+		fadeIn:Play()
+	end)
+
+	-- newParent:SetScript("OnHide", function(self)
+	-- 	fadeIn:Stop()
+	-- 	fadeOut:Play()
+	-- end)
+
+	return newParent
 end
 
 ------------------------------------------
