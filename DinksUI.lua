@@ -66,7 +66,7 @@ local options = {
 		buffFrame = { type = "input", name = "Buff Frame", desc = "BuffFrame", width = "full", order = 28 },
 		debuffFrame = { type = "input", name = "Debuff Frame", desc = "DebuffFrame", width = "full", order = 29 },
 		experienceBar = { type = "input", name = "Experience Bar", desc = "MainStatusTrackingBarContainer", width = "full", order = 30 },
-		skyRidingBar = { type = "input", name = "Sky Riding Bar", desc = "UIWidgetPowerBarContainerFrame", width = "full", order = 31 },
+		encounterBar = { type = "input", name = "EncounterBar / Sky Riding Bar", desc = "EncounterBar", width = "full", order = 31 },
 
 		bottomBlank = { type = "description", name = " ", fontSize = "medium", order = 97 },
 		bottomReloadTxt = { type = "description", name = "You will need to activate after confirming changes.", fontSize = "medium", order = 98 },
@@ -109,7 +109,7 @@ local defaults = {
 		buffFrame = "",
 		debuffFrame = "",
 		experienceBar = "[mod:ctrl][mod:alt][combat] show; hide",
-		skyRidingBar = "[mod:ctrl][mod:alt][combat] show; hide",
+		encounterBar = "[mod:ctrl][mod:alt][combat] show; hide",
 	},
 }
 
@@ -212,7 +212,7 @@ function DinksUI:RegisterAllFrames()
 	self:Register(frames.buffFrame.desc, conditionals.buffFrame)
 	self:Register(frames.debuffFrame.desc, conditionals.debuffFrame)
 	self:Register(frames.experienceBar.desc, conditionals.experienceBar)
-	self:Register(frames.skyRidingBar.desc, conditionals.skyRidingBar)
+	self:Register(frames.encounterBar.desc, conditionals.encounterBar)
 end
 
 -- Remember to also add new frames here as well.
@@ -242,7 +242,7 @@ function DinksUI:UnregisterAllFrames()
 	self:Unregister(frames.buffFrame.desc)
 	self:Unregister(frames.debuffFrame.desc)
 	self:Unregister(frames.experienceBar.desc)
-	self:Unregister(frames.skyRidingBar.desc)
+	self:Unregister(frames.encounterBar.desc)
 end
 
 function DinksUI:Register(frameKey, conditionalMacro)
@@ -304,26 +304,26 @@ function DinksUI:CreateNewParentFrame()
 	local fadeInAlpha = fadeIn:CreateAnimation("Alpha")
 	fadeInAlpha:SetFromAlpha(0)
 	fadeInAlpha:SetToAlpha(1)
-	fadeInAlpha:SetDuration(0.1)
+	fadeInAlpha:SetDuration(0.125)
 	fadeInAlpha:SetSmoothing("IN")
 
-	-- Fade-out animations don't seem to work with this method of hiding frames.
-	-- local fadeOut = newParent:CreateAnimationGroup()
-	-- local fadeOutAlpha = fadeOut:CreateAnimation("Alpha")
-	-- fadeOutAlpha:SetFromAlpha(1)
-	-- fadeOutAlpha:SetToAlpha(0)
-	-- fadeOutAlpha:SetDuration(0.5)
-	-- fadeOutAlpha:SetSmoothing("OUT")
+	-- Fade-out animations don't seem to work with this method of hiding frames...
+	local fadeOut = newParent:CreateAnimationGroup()
+	local fadeOutAlpha = fadeOut:CreateAnimation("Alpha")
+	fadeOutAlpha:SetFromAlpha(1)
+	fadeOutAlpha:SetToAlpha(0)
+	fadeOutAlpha:SetDuration(0.5)
+	fadeOutAlpha:SetSmoothing("OUT")
 
 	newParent:SetScript("OnShow", function(self)
-		-- fadeOut:Stop()
+		fadeOut:Stop()
 		fadeIn:Play()
 	end)
 
-	-- newParent:SetScript("OnHide", function(self)
-	-- 	fadeIn:Stop()
-	-- 	fadeOut:Play()
-	-- end)
+	newParent:SetScript("OnHide", function(self)
+		fadeIn:Stop()
+		fadeOut:Play()
+	end)
 
 	return newParent
 end
