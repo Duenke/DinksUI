@@ -331,3 +331,23 @@ end
 ------------------------------------------
 -- #endregion: local functions
 ------------------------------------------
+
+------------------------------------------
+-- #region: escape hatch
+------------------------------------------
+
+-- Frustratingly, the game will re-parent the `ObjectiveTrackerFrame` for a few reasons.
+-- 1) The player has leveled up. 2) The player is level scaled for TimeWalking instances. 3) ???
+-- For these reasons, we need to listen to all events on this frame and re-register it as needed.
+_G["ObjectiveTrackerFrame"]:HookScript("OnEvent", function(self, event, arg1, ...)
+	local frameKey = "ObjectiveTrackerFrame"
+	if FrameWrapperTable[frameKey] then
+		if _G[frameKey]:GetParent() == FrameWrapperTable[frameKey] then
+			DinksUI:Register(frameKey, DinksUI.db.profile.objectiveTracker)
+		end
+	end
+end)
+
+------------------------------------------
+-- #endregion: escape hatch
+------------------------------------------
