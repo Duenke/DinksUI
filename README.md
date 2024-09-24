@@ -1,7 +1,5 @@
 # Dinks' Immersive UI
 
-**Disclaimer: This addon is primarily built for personal use and learning. The software comes as is.**
-
 ## Description
 
 Dinks' Immersive UI is a World of Warcraft addon designed to enhance your gameplay experience by clearing up the UI until you need to see the UI elements. It allows you to customize which frames are shown or hidden based on your preferences. You can use regular macro conditionals to control the visibility of each frame.

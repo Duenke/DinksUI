@@ -17,6 +17,10 @@ local UIParent = UIParent
 -- Some frames don't handle it well when we trigger their `Hide` and `Show` methods.
 -- So we will just wrap them in new frames that will hide/show just fine.
 local FrameWrapperTable = {}
+local eventStack = {
+	"placeholder1", "placeholder2", "placeholder3", "placeholder4", "placeholder5",
+	"placeholder6", "placeholder7", "placeholder8", "placeholder9", "placeholder10",
+}
 
 -- An AceConfig schema options object.
 local options = {
@@ -180,6 +184,12 @@ function DinksUI:HandleSlashCommand(command)
 	elseif cmd == "hide" then
 		self:RegisterAllFrames()
 	else
+		DinksUI:Print("\n")
+		DinksUI:Print("Event Stack:")
+		for _, e in ipairs(eventStack) do
+			DinksUI:Print(e)
+		end
+		DinksUI:Print("\n")
 		self:Print("Command not found '" .. command .. "'")
 	end
 end
@@ -247,14 +257,16 @@ end
 
 function DinksUI:Register(frameKey, conditionalMacro)
 	if string.len(string.trim(conditionalMacro)) > 1 then
-		-- Save the original parent for `DinksUI.Unregister`.
-		-- If the frame was registered already and never unregistered, take the saved original parent.
-		local oldParent = FrameWrapperTable[frameKey] or _G[frameKey]:GetParent()
-		local newParent = self:CreateNewParentFrame()
+		-- If the frame was registered already and never unregistered, take the saved data.
+		FrameWrapperTable[frameKey] = FrameWrapperTable[frameKey] or {}
+		local oldParent = FrameWrapperTable[frameKey]['oldParent'] or _G[frameKey]:GetParent()
+		local newParent = FrameWrapperTable[frameKey]['newParent'] or self:CreateNewParentFrame()
 
-		_G[frameKey]:SetParent(newParent)
-		FrameWrapperTable[frameKey] = oldParent
+		-- Save the original parent for `DinksUI.Unregister`.
+		FrameWrapperTable[frameKey]['oldParent'] = oldParent
+		FrameWrapperTable[frameKey]['newParent'] = newParent
 		RegisterAttributeDriver(newParent, "state-visibility", conditionalMacro)
+		_G[frameKey]:SetParent(newParent)
 	end
 end
 
@@ -270,9 +282,8 @@ function DinksUI:RegisterChat(frameKey, conditionalMacro)
 end
 
 function DinksUI:Unregister(frameKey)
-	-- If the frame was registered, then restore the original parent.
 	if FrameWrapperTable[frameKey] then
-		_G[frameKey]:SetParent(FrameWrapperTable[frameKey])
+		_G[frameKey]:SetParent(FrameWrapperTable[frameKey]['oldParent'])
 		FrameWrapperTable[frameKey] = nil
 	end
 end
@@ -339,13 +350,26 @@ end
 -- Frustratingly, the game will re-parent the `ObjectiveTrackerFrame` for a few reasons.
 -- 1) The player has leveled up. 2) The player is level scaled for TimeWalking instances. 3) ???
 -- For these reasons, we need to listen to all events on this frame and re-register it as needed.
-_G["ObjectiveTrackerFrame"]:HookScript("OnEvent", function(self, event, arg1, ...)
+UIParent:HookScript("OnEvent", function(self, event, arg1, ...)
 	local frameKey = "ObjectiveTrackerFrame"
 	if FrameWrapperTable[frameKey] then
-		if _G[frameKey]:GetParent() == FrameWrapperTable[frameKey] then
+		if _G[frameKey]:GetParent() ~= FrameWrapperTable[frameKey]['newParent'] then
+			DinksUI:Print("The " .. frameKey .. " was re-parented!")
+			DinksUI:Print("The new, bad parent: " .. _G[frameKey]:GetParent())
+			DinksUI:Print("I new parent I want: " .. FrameWrapperTable[frameKey]['newParent'])
+			DinksUI:Print("I original parent: " .. FrameWrapperTable[frameKey]['oldParent'])
+			DinksUI:Print("\n")
+			DinksUI:Print("Event Stack:")
+			for _, e in ipairs(eventStack) do
+				DinksUI:Print(e)
+			end
+			DinksUI:Print("\n")
+			DinksUI:Print("Re-registering now...")
 			DinksUI:Register(frameKey, DinksUI.db.profile.objectiveTracker)
 		end
 	end
+	table.remove(eventStack, 1)
+	table.insert(eventStack, event)
 end)
 
 ------------------------------------------
