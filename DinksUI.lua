@@ -70,7 +70,8 @@ local options = {
 		buffFrame = { type = "input", name = "Buff Frame", desc = "BuffFrame", width = "full", order = 28 },
 		debuffFrame = { type = "input", name = "Debuff Frame", desc = "DebuffFrame", width = "full", order = 29 },
 		experienceBar = { type = "input", name = "Experience Bar", desc = "MainStatusTrackingBarContainer", width = "full", order = 30 },
-		encounterBar = { type = "input", name = "EncounterBar / Sky Riding Bar", desc = "EncounterBar", width = "full", order = 31 },
+		encounterBar = { type = "input", name = "EncounterBar (also hides achievement toast)", desc = "EncounterBar", width = "full", order = 31 },
+		skyRidingBar = { type = "input", name = "Sky Riding Bar", desc = "UIWidgetPowerBarContainerFrame", width = "full", order = 32 },
 
 		bottomBlank = { type = "description", name = " ", fontSize = "medium", order = 97 },
 		bottomReloadTxt = { type = "description", name = "You will need to activate after confirming changes.", fontSize = "medium", order = 98 },
@@ -113,7 +114,8 @@ local defaults = {
 		buffFrame = "",
 		debuffFrame = "",
 		experienceBar = "[mod:ctrl][mod:alt][combat] show; hide",
-		encounterBar = "[mod:ctrl][mod:alt][combat] show; hide",
+		encounterBar = "",
+		skyRidingBar = "[mod:ctrl][mod:alt][combat] show; hide",
 	},
 }
 
@@ -139,6 +141,7 @@ function DinksUI:OnEnable()
 	self:RegisterChatCommand("dui", "HandleSlashCommand")
 	self:RegisterChatCommand("dinksui", "HandleSlashCommand")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "HandleEnteringWorld")
+	self:RegisterEvent("PLAYER_LEAVING_WORLD", "HandleLeavingWorld")
 	EventRegistry:RegisterCallback("EditMode.Enter", self.UnregisterAllFrames, self)
 	EventRegistry:RegisterCallback("EditMode.Exit", self.RegisterAllFrames, self)
 end
@@ -146,7 +149,7 @@ end
 function DinksUI:OnDisable()
 	self:UnregisterChatCommand("dui")
 	self:UnregisterChatCommand("dinksui")
-	self:HandleExitingWorld()
+	self:HandleLeavingWorld()
 	EventRegistry:UnregisterCallback("EditMode.Enter", self)
 	EventRegistry:UnregisterCallback("EditMode.Exit", self)
 end
@@ -164,12 +167,14 @@ end
 -- Yes, at this time, `HandleEnteringWorld` only calls `RegisterAllFrames`, but
 -- at some point it might do more...and I wanted to document all this here.
 function DinksUI:HandleEnteringWorld()
+	self:Print("Entering World")
 	self:RegisterAllFrames()
 end
 
-function DinksUI:HandleExitingWorld()
+function DinksUI:HandleLeavingWorld()
+	self:Print("Leaving World")
 	self:UnregisterAllFrames()
-	FrameWrapperTable = nil
+	FrameWrapperTable = {}
 end
 
 function DinksUI:HandleSlashCommand(command)
@@ -184,12 +189,6 @@ function DinksUI:HandleSlashCommand(command)
 	elseif cmd == "hide" then
 		self:RegisterAllFrames()
 	else
-		DinksUI:Print("\n")
-		DinksUI:Print("Event Stack:")
-		for _, e in ipairs(eventStack) do
-			DinksUI:Print(e)
-		end
-		DinksUI:Print("\n")
 		self:Print("Command not found '" .. command .. "'")
 	end
 end
@@ -223,6 +222,7 @@ function DinksUI:RegisterAllFrames()
 	self:Register(frames.debuffFrame.desc, conditionals.debuffFrame)
 	self:Register(frames.experienceBar.desc, conditionals.experienceBar)
 	self:Register(frames.encounterBar.desc, conditionals.encounterBar)
+	self:RegisterSkyRiding(frames.skyRidingBar.desc, conditionals.skyRidingBar)
 end
 
 -- Remember to also add new frames here as well.
@@ -253,6 +253,7 @@ function DinksUI:UnregisterAllFrames()
 	self:Unregister(frames.debuffFrame.desc)
 	self:Unregister(frames.experienceBar.desc)
 	self:Unregister(frames.encounterBar.desc)
+	self:UnregisterSkyRiding(frames.skyRidingBar.desc)
 end
 
 function DinksUI:Register(frameKey, conditionalMacro)
@@ -262,11 +263,24 @@ function DinksUI:Register(frameKey, conditionalMacro)
 		local oldParent = FrameWrapperTable[frameKey]['oldParent'] or _G[frameKey]:GetParent()
 		local newParent = FrameWrapperTable[frameKey]['newParent'] or self:CreateNewParentFrame()
 
+		_G[frameKey]:SetParent(newParent)
+		RegisterAttributeDriver(newParent, "state-visibility", conditionalMacro)
+
 		-- Save the original parent for `DinksUI.Unregister`.
 		FrameWrapperTable[frameKey]['oldParent'] = oldParent
 		FrameWrapperTable[frameKey]['newParent'] = newParent
-		RegisterAttributeDriver(newParent, "state-visibility", conditionalMacro)
-		_G[frameKey]:SetParent(newParent)
+		if frameKey == "ObjectiveTrackerFrame" then
+			DinksUI:Print("Registering " .. frameKey)
+			DinksUI:Print(newParent)
+		end
+	end
+end
+
+-- The SkyRidingBar is inside the Encoutner frame, and does not do well if we wrap it in a new parent.
+-- The downside of wrapping the whole Encounter frame is that it also hides the achievement toast!
+function DinksUI:RegisterSkyRiding(frameKey, conditionalMacro)
+	if string.len(string.trim(conditionalMacro)) > 1 then
+		RegisterAttributeDriver(_G[frameKey], "state-visibility", conditionalMacro)
 	end
 end
 
@@ -286,6 +300,11 @@ function DinksUI:Unregister(frameKey)
 		_G[frameKey]:SetParent(FrameWrapperTable[frameKey]['oldParent'])
 		FrameWrapperTable[frameKey] = nil
 	end
+end
+
+function DinksUI:UnregisterSkyRiding(frameKey)
+	UnregisterAttributeDriver(_G[frameKey], "state-visibility")
+	_G[frameKey]:Show()
 end
 
 function DinksUI:UnregisterChat(frameKey, conditionalMacro)
@@ -350,14 +369,19 @@ end
 -- Frustratingly, the game will re-parent the `ObjectiveTrackerFrame` for a few reasons.
 -- 1) The player has leveled up. 2) The player is level scaled for TimeWalking instances. 3) ???
 -- For these reasons, we need to listen to all events on this frame and re-register it as needed.
-UIParent:HookScript("OnEvent", function(self, event, arg1, ...)
+-- UIParent:HookScript("OnEvent", function(self, event, arg1, ...)
+_G["ObjectiveTrackerFrame"]:HookScript("OnEvent", function(self, event, arg1, ...)
 	local frameKey = "ObjectiveTrackerFrame"
+
+	table.remove(eventStack, 1)
+	table.insert(eventStack, event)
+
 	if FrameWrapperTable[frameKey] then
-		if _G[frameKey]:GetParent() ~= FrameWrapperTable[frameKey]['newParent'] then
+		if FrameWrapperTable[frameKey]['newParent'] ~= _G[frameKey]:GetParent() then
 			DinksUI:Print("The " .. frameKey .. " was re-parented!")
-			DinksUI:Print("The new, bad parent: " .. _G[frameKey]:GetParent())
-			DinksUI:Print("I new parent I want: " .. FrameWrapperTable[frameKey]['newParent'])
-			DinksUI:Print("I original parent: " .. FrameWrapperTable[frameKey]['oldParent'])
+			DinksUI:Print("The new, bad parent: " .. tostring(_G[frameKey]:GetParent()))
+			DinksUI:Print("I new parent I want: " .. tostring(FrameWrapperTable[frameKey]['newParent']))
+			DinksUI:Print("I original parent: " .. tostring(FrameWrapperTable[frameKey]['oldParent']))
 			DinksUI:Print("\n")
 			DinksUI:Print("Event Stack:")
 			for _, e in ipairs(eventStack) do
@@ -368,9 +392,9 @@ UIParent:HookScript("OnEvent", function(self, event, arg1, ...)
 			DinksUI:Register(frameKey, DinksUI.db.profile.objectiveTracker)
 		end
 	end
-	table.remove(eventStack, 1)
-	table.insert(eventStack, event)
 end)
+
+-- i suspect its UNIT_QUEST_LOG_CHANGED or PLAYER_SPECIALIZATION_CHANGED
 
 ------------------------------------------
 -- #endregion: escape hatch
