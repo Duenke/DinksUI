@@ -13,14 +13,11 @@ local OpenToCategory = Settings.OpenToCategory
 local NUM_CHAT_WINDOWS = NUM_CHAT_WINDOWS
 local RegisterAttributeDriver = RegisterAttributeDriver
 local UIParent = UIParent
+local UnregisterAttributeDriver = UnregisterAttributeDriver
 
 -- Some frames don't handle it well when we trigger their `Hide` and `Show` methods.
 -- So we will just wrap them in new frames that will hide/show just fine.
 local FrameWrapperTable = {}
-local eventStack = {
-	"placeholder1", "placeholder2", "placeholder3", "placeholder4", "placeholder5",
-	"placeholder6", "placeholder7", "placeholder8", "placeholder9", "placeholder10",
-}
 
 -- An AceConfig schema options object.
 local options = {
@@ -41,8 +38,7 @@ local options = {
 			name = "Activate",
 			order = 6,
 			func = function()
-				DinksUI:UnregisterAllFrames()
-				DinksUI:RegisterAllFrames()
+				DinksUI:ReapplyAllFrames()
 			end
 		},
 
@@ -70,8 +66,7 @@ local options = {
 		buffFrame = { type = "input", name = "Buff Frame", desc = "BuffFrame", width = "full", order = 28 },
 		debuffFrame = { type = "input", name = "Debuff Frame", desc = "DebuffFrame", width = "full", order = 29 },
 		experienceBar = { type = "input", name = "Experience Bar", desc = "MainStatusTrackingBarContainer", width = "full", order = 30 },
-		encounterBar = { type = "input", name = "EncounterBar (also hides achievement toast)", desc = "EncounterBar", width = "full", order = 31 },
-		skyRidingBar = { type = "input", name = "Sky Riding Bar", desc = "UIWidgetPowerBarContainerFrame", width = "full", order = 32 },
+		skyRidingBar = { type = "input", name = "Sky Riding Bar", desc = "UIWidgetPowerBarContainerFrame", width = "full", order = 31 },
 
 		bottomBlank = { type = "description", name = " ", fontSize = "medium", order = 97 },
 		bottomReloadTxt = { type = "description", name = "You will need to activate after confirming changes.", fontSize = "medium", order = 98 },
@@ -80,8 +75,7 @@ local options = {
 			name = "Activate",
 			order = 99,
 			func = function()
-				DinksUI:UnregisterAllFrames()
-				DinksUI:RegisterAllFrames()
+				DinksUI:ReapplyAllFrames()
 			end
 		},
 	},
@@ -89,6 +83,36 @@ local options = {
 
 -- Default options match a subset of the `options.args` above.
 local defaults = {
+	profile = {
+		actionBar1 = "",
+		actionBar2 = "",
+		actionBar3 = "",
+		actionBar4 = "",
+		actionBar5 = "",
+		actionBar6 = "",
+		actionBar7 = "",
+		actionBar8 = "",
+		petActionBar = "",
+		stanceBar = "",
+		playerFrame = "",
+		targetFrame = "",
+		focusFrame = "",
+		petFrame = "",
+		raidFrame = "",
+		partyFrame = "",
+		objectiveTracker = "",
+		chatFrame = "",
+		minimap = "",
+		bagsBar = "",
+		microMenu = "",
+		buffFrame = "",
+		debuffFrame = "",
+		experienceBar = "",
+		skyRidingBar = "",
+	},
+}
+
+local dinksDefaults = {
 	profile = {
 		actionBar1 = "[mod:ctrl][mod:alt][combat] show; hide",
 		actionBar2 = "[mod:ctrl][mod:alt][combat] show; hide",
@@ -114,7 +138,6 @@ local defaults = {
 		buffFrame = "",
 		debuffFrame = "",
 		experienceBar = "[mod:ctrl][mod:alt][combat] show; hide",
-		encounterBar = "",
 		skyRidingBar = "[mod:ctrl][mod:alt][combat] show; hide",
 	},
 }
@@ -129,6 +152,8 @@ local defaults = {
 
 function DinksUI:OnInitialize()
 	self.db = LibStub("AceDB-3.0"):New("DinksUIDB", defaults, true)
+	self.db.RegisterCallback(self, "OnProfileChanged", "ReapplyAllFrames")
+
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("DinksUI_options", options)
 	self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("DinksUI_options", "DinksUI")
 
@@ -193,6 +218,11 @@ function DinksUI:HandleSlashCommand(command)
 	end
 end
 
+function DinksUI:ReapplyAllFrames()
+	self:UnregisterAllFrames()
+	self:RegisterAllFrames()
+end
+
 -- This is the main function. This is where new frames can be added.
 function DinksUI:RegisterAllFrames()
 	local frames = options.args
@@ -221,7 +251,6 @@ function DinksUI:RegisterAllFrames()
 	self:Register(frames.buffFrame.desc, conditionals.buffFrame)
 	self:Register(frames.debuffFrame.desc, conditionals.debuffFrame)
 	self:Register(frames.experienceBar.desc, conditionals.experienceBar)
-	self:Register(frames.encounterBar.desc, conditionals.encounterBar)
 	self:RegisterSkyRiding(frames.skyRidingBar.desc, conditionals.skyRidingBar)
 end
 
@@ -252,7 +281,6 @@ function DinksUI:UnregisterAllFrames()
 	self:Unregister(frames.buffFrame.desc)
 	self:Unregister(frames.debuffFrame.desc)
 	self:Unregister(frames.experienceBar.desc)
-	self:Unregister(frames.encounterBar.desc)
 	self:UnregisterSkyRiding(frames.skyRidingBar.desc)
 end
 
@@ -366,10 +394,17 @@ end
 -- #region: escape hatch
 ------------------------------------------
 
+local eventStack = {
+	"placeholder1", "placeholder2", "placeholder3", "placeholder4", "placeholder5",
+	"placeholder6", "placeholder7", "placeholder8", "placeholder9", "placeholder10",
+}
+
 -- Frustratingly, the game will re-parent the `ObjectiveTrackerFrame` for a few reasons.
 -- 1) The player has leveled up. 2) The player is level scaled for TimeWalking instances. 3) ???
 -- For these reasons, we need to listen to all events on this frame and re-register it as needed.
+
 -- UIParent:HookScript("OnEvent", function(self, event, arg1, ...)
+
 _G["ObjectiveTrackerFrame"]:HookScript("OnEvent", function(self, event, arg1, ...)
 	local frameKey = "ObjectiveTrackerFrame"
 
