@@ -9,6 +9,7 @@ DinksUI = LibStub("AceAddon-3.0"):NewAddon("DinksUI", "AceConsole-3.0", "AceEven
 local _G = _G
 local CreateFrame = CreateFrame
 local EventRegistry = EventRegistry
+local hooksecurefunc = hooksecurefunc
 local OpenToCategory = Settings.OpenToCategory
 local NUM_CHAT_WINDOWS = NUM_CHAT_WINDOWS
 local RegisterAttributeDriver = RegisterAttributeDriver
@@ -82,7 +83,7 @@ local options = {
 }
 
 -- Default options match a subset of the `options.args` above.
-local defaults = {
+local blanks = {
 	profile = {
 		actionBar1 = "",
 		actionBar2 = "",
@@ -151,7 +152,7 @@ local dinksDefaults = {
 ------------------------------------------
 
 function DinksUI:OnInitialize()
-	self.db = LibStub("AceDB-3.0"):New("DinksUIDB", defaults, true)
+	self.db = LibStub("AceDB-3.0"):New("DinksUIDB", dinksDefaults, true)
 	self.db.RegisterCallback(self, "OnProfileChanged", "ReapplyAllFrames")
 
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("DinksUI_options", options)
@@ -192,12 +193,10 @@ end
 -- Yes, at this time, `HandleEnteringWorld` only calls `RegisterAllFrames`, but
 -- at some point it might do more...and I wanted to document all this here.
 function DinksUI:HandleEnteringWorld()
-	self:Print("Entering World")
 	self:RegisterAllFrames()
 end
 
 function DinksUI:HandleLeavingWorld()
-	self:Print("Leaving World")
 	self:UnregisterAllFrames()
 	FrameWrapperTable = {}
 end
@@ -291,16 +290,12 @@ function DinksUI:Register(frameKey, conditionalMacro)
 		local oldParent = FrameWrapperTable[frameKey]['oldParent'] or _G[frameKey]:GetParent()
 		local newParent = FrameWrapperTable[frameKey]['newParent'] or self:CreateNewParentFrame()
 
-		_G[frameKey]:SetParent(newParent)
-		RegisterAttributeDriver(newParent, "state-visibility", conditionalMacro)
-
-		-- Save the original parent for `DinksUI.Unregister`.
+		-- Save the original parent for `DinksUI.Unregister` and the new parent for the escape hatches.
 		FrameWrapperTable[frameKey]['oldParent'] = oldParent
 		FrameWrapperTable[frameKey]['newParent'] = newParent
-		if frameKey == "ObjectiveTrackerFrame" then
-			DinksUI:Print("Registering " .. frameKey)
-			DinksUI:Print(newParent)
-		end
+
+		_G[frameKey]:SetParent(newParent)
+		RegisterAttributeDriver(newParent, "state-visibility", conditionalMacro)
 	end
 end
 
@@ -391,46 +386,45 @@ end
 ------------------------------------------
 
 ------------------------------------------
--- #region: escape hatch
+-- #region: escape hatches
 ------------------------------------------
-
-local eventStack = {
-	"placeholder1", "placeholder2", "placeholder3", "placeholder4", "placeholder5",
-	"placeholder6", "placeholder7", "placeholder8", "placeholder9", "placeholder10",
-}
 
 -- Frustratingly, the game will re-parent the `ObjectiveTrackerFrame` for a few reasons.
 -- 1) The player has leveled up. 2) The player is level scaled for TimeWalking instances. 3) ???
--- For these reasons, we need to listen to all events on this frame and re-register it as needed.
+-- For these reasons, we need to watch for re-parenting on this frame and re-register it as needed.
+local function HookSetParent(frame, conditionalKey)
+	if not frame.SetParentHooked then
+		frame.SetParentHooked = true
 
--- UIParent:HookScript("OnEvent", function(self, event, arg1, ...)
+		hooksecurefunc(frame, "SetParent", function()
+			local frameKey = frame:GetName()
 
-_G["ObjectiveTrackerFrame"]:HookScript("OnEvent", function(self, event, arg1, ...)
-	local frameKey = "ObjectiveTrackerFrame"
+			if FrameWrapperTable[frameKey] then
+				if FrameWrapperTable[frameKey]['newParent'] ~= _G[frameKey]:GetParent() then
+					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+					DinksUI:Print("The " .. frameKey .. " was re-parented!")
+					DinksUI:Print("Re-registering now...")
 
-	table.remove(eventStack, 1)
-	table.insert(eventStack, event)
-
-	if FrameWrapperTable[frameKey] then
-		if FrameWrapperTable[frameKey]['newParent'] ~= _G[frameKey]:GetParent() then
-			DinksUI:Print("The " .. frameKey .. " was re-parented!")
-			DinksUI:Print("The new, bad parent: " .. tostring(_G[frameKey]:GetParent()))
-			DinksUI:Print("I new parent I want: " .. tostring(FrameWrapperTable[frameKey]['newParent']))
-			DinksUI:Print("I original parent: " .. tostring(FrameWrapperTable[frameKey]['oldParent']))
-			DinksUI:Print("\n")
-			DinksUI:Print("Event Stack:")
-			for _, e in ipairs(eventStack) do
-				DinksUI:Print(e)
+					DinksUI:Register(frameKey, DinksUI.db.profile[conditionalKey])
+				end
 			end
-			DinksUI:Print("\n")
-			DinksUI:Print("Re-registering now...")
-			DinksUI:Register(frameKey, DinksUI.db.profile.objectiveTracker)
-		end
+		end)
 	end
-end)
+end
 
--- i suspect its UNIT_QUEST_LOG_CHANGED or PLAYER_SPECIALIZATION_CHANGED
+HookSetParent(_G["ObjectiveTrackerFrame"], "objectiveTracker")
 
 ------------------------------------------
--- #endregion: escape hatch
+-- #endregion: escape hatches
 ------------------------------------------
