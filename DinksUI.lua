@@ -83,7 +83,7 @@ local options = {
 }
 
 -- Default options match a subset of the `options.args` above.
-local blanks = {
+local defaults = {
 	profile = {
 		actionBar1 = "",
 		actionBar2 = "",
@@ -110,37 +110,35 @@ local blanks = {
 		debuffFrame = "",
 		experienceBar = "",
 		skyRidingBar = "",
-	},
+	}
 }
 
 local dinksDefaults = {
-	profile = {
-		actionBar1 = "[mod:ctrl][mod:alt][combat] show; hide",
-		actionBar2 = "[mod:ctrl][mod:alt][combat] show; hide",
-		actionBar3 = "[mod:ctrl][mod:alt][combat] show; hide",
-		actionBar4 = "[mod:ctrl] show; hide",
-		actionBar5 = "[mod:ctrl] show; hide",
-		actionBar6 = "",
-		actionBar7 = "",
-		actionBar8 = "",
-		petActionBar = "[mod:ctrl,@pet,exists] show; hide",
-		stanceBar = "[mod:ctrl][mod:alt][combat] show; hide",
-		playerFrame = "[mod:ctrl] show; hide",
-		targetFrame = "[mod:ctrl] show; hide",
-		focusFrame = "",
-		petFrame = "[mod:alt, @pet][mod:ctrl, @pet][combat] show; hide",
-		raidFrame = "[mod:ctrl][nocombat] show; hide",
-		partyFrame = "",
-		objectiveTracker = "[mod:ctrl][mod:alt, nocombat] show; hide",
-		chatFrame = "",
-		minimap = "",
-		bagsBar = "[mod:ctrl] show; hide",
-		microMenu = "[mod:ctrl] show; hide",
-		buffFrame = "",
-		debuffFrame = "",
-		experienceBar = "[mod:ctrl][mod:alt][combat] show; hide",
-		skyRidingBar = "[mod:ctrl][mod:alt][combat] show; hide",
-	},
+	actionBar1 = "[mod:ctrl][mod:alt][combat] show; hide",
+	actionBar2 = "[mod:ctrl][mod:alt][combat] show; hide",
+	actionBar3 = "[mod:ctrl][mod:alt][combat] show; hide",
+	actionBar4 = "[mod:ctrl] show; hide",
+	actionBar5 = "[mod:ctrl] show; hide",
+	actionBar6 = "",
+	actionBar7 = "",
+	actionBar8 = "",
+	petActionBar = "[mod:ctrl,@pet,exists] show; hide",
+	stanceBar = "[mod:ctrl][mod:alt][combat] show; hide",
+	playerFrame = "[mod:ctrl] show; hide",
+	targetFrame = "[mod:ctrl] show; hide",
+	focusFrame = "",
+	petFrame = "[mod:alt, @pet][mod:ctrl, @pet][combat] show; hide",
+	raidFrame = "[mod:ctrl][nocombat] show; hide",
+	partyFrame = "",
+	objectiveTracker = "[mod:ctrl][mod:alt, nocombat] show; hide",
+	chatFrame = "",
+	minimap = "",
+	bagsBar = "[mod:ctrl] show; hide",
+	microMenu = "[mod:ctrl] show; hide",
+	buffFrame = "",
+	debuffFrame = "",
+	experienceBar = "[mod:ctrl][mod:alt][combat] show; hide",
+	skyRidingBar = "[mod:ctrl][mod:alt][combat] show; hide",
 }
 
 ------------------------------------------
@@ -152,18 +150,21 @@ local dinksDefaults = {
 ------------------------------------------
 
 function DinksUI:OnInitialize()
-	self.db = LibStub("AceDB-3.0"):New("DinksUIDB", dinksDefaults, true)
-	self.db.RegisterCallback(self, "OnProfileChanged", "ReapplyAllFrames")
-
+	self.db = LibStub("AceDB-3.0"):New("DinksUIDB", defaults, true)
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("DinksUI_options", options)
 	self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("DinksUI_options", "DinksUI")
 
 	local profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("DinksUI_Profiles", profiles)
 	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("DinksUI_Profiles", "Profiles", "DinksUI")
+
+	self.db.RegisterCallback(self, "OnProfileChanged", "ReapplyAllFrames")
+	self.db.RegisterCallback(self, "OnProfileCopied", "ReapplyAllFrames")
+	self.db.RegisterCallback(self, "OnProfileReset", "ReapplyAllFrames")
 end
 
 function DinksUI:OnEnable()
+	self:PopulateDefaultProfiles()
 	self:RegisterChatCommand("dui", "HandleSlashCommand")
 	self:RegisterChatCommand("dinksui", "HandleSlashCommand")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "HandleEnteringWorld")
@@ -187,6 +188,24 @@ end
 ------------------------------------------
 -- #region: local functions
 ------------------------------------------
+
+function DinksUI:PopulateDefaultProfiles()
+	local selectedProfile = self.db:GetCurrentProfile()
+
+	-- Set up the "DinksDefaults" profile.
+	self.db:SetProfile("DinksDefaults")
+	for key, value in pairs(dinksDefaults) do
+		self.db.profile[key] = value
+	end
+
+	-- Now set back to the user selected profile.
+	self.db:SetProfile(selectedProfile)
+
+	-- Default values don't actually save in the DB. Explicitly set them now.
+	for key, _ in pairs(dinksDefaults) do
+		self.db.profile[key] = self.db.profile[key]
+	end
+end
 
 -- So, `PLAYER_ENTERING_WORLD` basically means "finished any loading screen".
 -- Because the UI is rebuilt every loading screen, we need to start all the work here.
@@ -330,7 +349,7 @@ function DinksUI:UnregisterSkyRiding(frameKey)
 	_G[frameKey]:Show()
 end
 
-function DinksUI:UnregisterChat(frameKey, conditionalMacro)
+function DinksUI:UnregisterChat(frameKey)
 	for i = 1, NUM_CHAT_WINDOWS do
 		self:Unregister(frameKey .. i)
 	end
