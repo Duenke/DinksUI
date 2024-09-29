@@ -421,21 +421,6 @@ local function HookSetParent(frame, conditionalKey)
 
 			if FrameWrapperTable[frameKey] then
 				if FrameWrapperTable[frameKey]['newParent'] ~= _G[frameKey]:GetParent() then
-					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-					DinksUI:Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-					DinksUI:Print("The " .. frameKey .. " was re-parented!")
-					DinksUI:Print("Re-registering now...")
-
 					DinksUI:Register(frameKey, DinksUI.db.profile[conditionalKey])
 				end
 			end
