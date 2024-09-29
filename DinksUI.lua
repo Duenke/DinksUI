@@ -28,20 +28,13 @@ local options = {
 	get = "GetValue",
 	set = "SetValue",
 	args = {
-		desc1 = { type = "description", name = "Supply each frame below with a macro conditional of your chosing or none.", fontSize = "medium", order = 0 },
-		desc2 = { type = "description", name = "Ex 1: MainMenuBar: [vehicleui] hide; [mod:ctrl][mod:alt][combat] show; hide", fontSize = "medium", order = 1 },
-		desc3 = { type = "description", name = "Ex 2: PetActionBar: [mod:ctrl,@pet,exists] show; hide", fontSize = "medium", order = 2 },
-		slashCmdTxt = { type = "description", name = "You can use '/dinksui show' and /dinksui hide' to temporarily toggle visibility. You can even make a macro!", fontSize = "medium", order = 3 },
-		blank = { type = "description", name = " ", fontSize = "medium", order = 4 },
-		reloadTxt = { type = "description", name = "You will need to activate after confirming changes.", fontSize = "medium", order = 5 },
-		reloadBtn = {
-			type = "execute",
-			name = "Activate",
-			order = 6,
-			func = function()
-				DinksUI:ReapplyAllFrames()
-			end
-		},
+		info = { type = "description", name = "For each frame below that you want to hide, supply a macro conditional of your chosing.", fontSize = "medium", order = 0 },
+		ex1 = { type = "description", name = "Ex 1: Action Bar 1:    [mod:ctrl][mod:alt][combat] show; hide", fontSize = "medium", order = 1 },
+		ex2 = { type = "description", name = "Ex 2: Pet Action Bar: [mod:ctrl] show; hide", fontSize = "medium", order = 2 },
+		ex3 = { type = "description", name = "Ex 3: Raid Frame:      [mod:ctrl][nocombat] show; hide", fontSize = "medium", order = 3 },
+		dinksdefaults = { type = "description", name = "You can save as many profiles as you want, or just use DinksDefaults!", fontSize = "medium", order = 4 },
+		slashCmdTxt = { type = "description", name = "Type '/dinksui help' or '/dui h' in the chat window for more.", fontSize = "medium", order = 5 },
+		blank = { type = "description", name = " ", fontSize = "medium", order = 6 },
 
 		actionBar1 = { type = "input", name = "Action Bar 1", desc = "MainMenuBar", width = "full", order = 7 },
 		actionBar2 = { type = "input", name = "Action Bar 2", desc = "MultiBarBottomLeft", width = "full", order = 8 },
@@ -68,22 +61,41 @@ local options = {
 		debuffFrame = { type = "input", name = "Debuff Frame", desc = "DebuffFrame", width = "full", order = 29 },
 		experienceBar = { type = "input", name = "Experience Bar", desc = "MainStatusTrackingBarContainer", width = "full", order = 30 },
 		skyRidingBar = { type = "input", name = "Sky Riding Bar", desc = "UIWidgetPowerBarContainerFrame", width = "full", order = 31 },
-
-		bottomBlank = { type = "description", name = " ", fontSize = "medium", order = 97 },
-		bottomReloadTxt = { type = "description", name = "You will need to activate after confirming changes.", fontSize = "medium", order = 98 },
-		bottomReloadBtn = {
-			type = "execute",
-			name = "Activate",
-			order = 99,
-			func = function()
-				DinksUI:ReapplyAllFrames()
-			end
-		},
 	},
 }
 
 -- Default options match a subset of the `options.args` above.
-local defaults = {
+local blanks = {
+	profile = {
+		actionBar1 = "",
+		actionBar2 = "",
+		actionBar3 = "",
+		actionBar4 = "",
+		actionBar5 = "",
+		actionBar6 = "",
+		actionBar7 = "",
+		actionBar8 = "",
+		petActionBar = "",
+		stanceBar = "",
+		playerFrame = "",
+		targetFrame = "",
+		focusFrame = "",
+		petFrame = "",
+		raidFrame = "",
+		partyFrame = "",
+		objectiveTracker = "",
+		chatFrame = "",
+		minimap = "",
+		bagsBar = "",
+		microMenu = "",
+		buffFrame = "",
+		debuffFrame = "",
+		experienceBar = "",
+		skyRidingBar = "",
+	}
+}
+
+local dinksDefaults = {
 	profile = {
 		actionBar1 = "[mod:ctrl][mod:alt][combat] show; hide",
 		actionBar2 = "[mod:ctrl][mod:alt][combat] show; hide",
@@ -93,7 +105,7 @@ local defaults = {
 		actionBar6 = "",
 		actionBar7 = "",
 		actionBar8 = "",
-		petActionBar = "[mod:ctrl,@pet,exists] show; hide",
+		petActionBar = "[mod:ctrl, @pet, exists] show; hide",
 		stanceBar = "[mod:ctrl][mod:alt][combat] show; hide",
 		playerFrame = "[mod:ctrl] show; hide",
 		targetFrame = "[mod:ctrl] show; hide",
@@ -113,34 +125,6 @@ local defaults = {
 	}
 }
 
-local dinksDefaults = {
-	actionBar1 = "[mod:ctrl][mod:alt][combat] show; hide",
-	actionBar2 = "[mod:ctrl][mod:alt][combat] show; hide",
-	actionBar3 = "[mod:ctrl][mod:alt][combat] show; hide",
-	actionBar4 = "[mod:ctrl] show; hide",
-	actionBar5 = "[mod:ctrl] show; hide",
-	actionBar6 = "",
-	actionBar7 = "",
-	actionBar8 = "",
-	petActionBar = "[mod:ctrl,@pet,exists] show; hide",
-	stanceBar = "[mod:ctrl][mod:alt][combat] show; hide",
-	playerFrame = "[mod:ctrl] show; hide",
-	targetFrame = "[mod:ctrl] show; hide",
-	focusFrame = "",
-	petFrame = "[mod:alt, @pet][mod:ctrl, @pet][combat] show; hide",
-	raidFrame = "[mod:ctrl][nocombat] show; hide",
-	partyFrame = "",
-	objectiveTracker = "[mod:ctrl][mod:alt, nocombat] show; hide",
-	chatFrame = "",
-	minimap = "",
-	bagsBar = "[mod:ctrl] show; hide",
-	microMenu = "[mod:ctrl] show; hide",
-	buffFrame = "",
-	debuffFrame = "",
-	experienceBar = "[mod:ctrl][mod:alt][combat] show; hide",
-	skyRidingBar = "[mod:ctrl][mod:alt][combat] show; hide",
-}
-
 ------------------------------------------
 -- #endregion: locals
 ------------------------------------------
@@ -150,7 +134,7 @@ local dinksDefaults = {
 ------------------------------------------
 
 function DinksUI:OnInitialize()
-	self.db = LibStub("AceDB-3.0"):New("DinksUIDB", defaults, true)
+	self.db = LibStub("AceDB-3.0"):New("DinksUIDB", dinksDefaults, true)
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("DinksUI_options", options)
 	self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("DinksUI_options", "DinksUI")
 
@@ -164,7 +148,7 @@ function DinksUI:OnInitialize()
 end
 
 function DinksUI:OnEnable()
-	-- self:SetupDinksDefaults()
+	self:SetupDinksDefaults()
 	self:RegisterChatCommand("dui", "HandleSlashCommand")
 	self:RegisterChatCommand("dinksui", "HandleSlashCommand")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "HandleEnteringWorld")
@@ -194,26 +178,28 @@ function DinksUI:SetupDinksDefaults()
 
 	-- Set up the "DinksDefaults" profile.
 	self.db:SetProfile("DinksDefaults")
-	for key, value in pairs(dinksDefaults) do
+
+	for key, value in pairs(dinksDefaults.profile) do
 		self.db.profile[key] = value
 	end
 
 	-- Now set back to the user selected profile.
 	self.db:SetProfile(selectedProfile)
 
-	-- Default values don't actually save in the DB. Explicitly set them now.
-	for key, _ in pairs(dinksDefaults) do
-		self:Print(key .. ": " .. self.db.profile[key])
-		self.db.profile[key] = self.db.profile[key] or ""
+	-- I want to change the default to all blanks in the next update.
+	-- Default values don't actually save in the DB.
+	-- Explicitly set them now to preserve whatever state the current users have.
+	for key, _ in pairs(dinksDefaults.profile) do
+		self.db.profile[key] = self.db.profile[key] .. " "
 	end
 end
 
 -- So, `PLAYER_ENTERING_WORLD` basically means "finished any loading screen".
 -- Because the UI is rebuilt every loading screen, we need to start all the work here.
--- Yes, at this time, `HandleEnteringWorld` only calls `RegisterAllFrames`, but
+-- Yes, at this time, `HandleEnteringWorld` only calls `ReapplyAllFrames`, but
 -- at some point it might do more...and I wanted to document all this here.
 function DinksUI:HandleEnteringWorld()
-	self:RegisterAllFrames()
+	self:ReapplyAllFrames()
 end
 
 function DinksUI:HandleLeavingWorld()
@@ -226,8 +212,22 @@ function DinksUI:HandleSlashCommand(command)
 	if not cmd or cmd == "" then
 		OpenToCategory(self.optionsFrame.name)
 	elseif cmd == "h" or cmd == "help" then
-		self:Print("type '/dinksui show' to temporarily show all frames.")
-		self:Print("type '/dinksui hide' to again hide all frames.")
+		self:Print("\n" ..
+			-- "The Default profile is all blanks and can be reset on demand. \n" ..
+			"The DinksDefaults profile is reset on each reload. \n" ..
+			"The Default profile is the same as DinksDefaults, but can be reset on demand. \n" ..
+			"type '/dinksui show' or '/dui show' to temporarily show all frames. \n" ..
+			"type '/dinksui hide' or '/dui hide' to again hide all frames. \n" ..
+			"Tip: Make some macros! =) \n" ..
+			"For help with macro conditionals you can reference: \n" ..
+			"  https://wowpedia.fandom.com/wiki/Macro_conditionals \n" ..
+			"\n")
+		self:Print("\n" ..
+			"Notice: The Default profile currently contains my prefered settings. \n" ..
+			"I've decided to set the Default profile to blank after feedback from you all. \n" ..
+			"Your current settings should be preserved during this switch in a couple weeks. \n" ..
+			"Thank you for using DinksUI! =) \n" ..
+			"\n")
 	elseif cmd == "show" then
 		self:UnregisterAllFrames()
 	elseif cmd == "hide" then
@@ -340,8 +340,9 @@ end
 
 function DinksUI:Unregister(frameKey)
 	if FrameWrapperTable[frameKey] then
-		_G[frameKey]:SetParent(FrameWrapperTable[frameKey]['oldParent'])
+		local oldParent = FrameWrapperTable[frameKey]['oldParent']
 		FrameWrapperTable[frameKey] = nil
+		_G[frameKey]:SetParent(oldParent)
 	end
 end
 
@@ -368,6 +369,7 @@ end
 
 function DinksUI:SetValue(info, value)
 	self.db.profile[info[#info]] = value
+	self:ReapplyAllFrames()
 end
 
 function DinksUI:CreateNewParentFrame()
@@ -421,6 +423,7 @@ local function HookSetParent(frame, conditionalKey)
 
 			if FrameWrapperTable[frameKey] then
 				if FrameWrapperTable[frameKey]['newParent'] ~= _G[frameKey]:GetParent() then
+					DinksUI:Unregister(frameKey)
 					DinksUI:Register(frameKey, DinksUI.db.profile[conditionalKey])
 				end
 			end
