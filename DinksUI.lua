@@ -164,7 +164,7 @@ function DinksUI:OnInitialize()
 end
 
 function DinksUI:OnEnable()
-	self:PopulateDefaultProfiles()
+	self:SetupDinksDefaults()
 	self:RegisterChatCommand("dui", "HandleSlashCommand")
 	self:RegisterChatCommand("dinksui", "HandleSlashCommand")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "HandleEnteringWorld")
@@ -189,7 +189,7 @@ end
 -- #region: local functions
 ------------------------------------------
 
-function DinksUI:PopulateDefaultProfiles()
+function DinksUI:SetupDinksDefaults()
 	local selectedProfile = self.db:GetCurrentProfile()
 
 	-- Set up the "DinksDefaults" profile.
