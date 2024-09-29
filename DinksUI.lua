@@ -29,9 +29,9 @@ local options = {
 	set = "SetValue",
 	args = {
 		info = { type = "description", name = "For each frame below that you want to hide, supply a macro conditional of your chosing.", fontSize = "medium", order = 0 },
-		ex1 = { type = "description", name = "Ex 1: Action Bar 1:    [mod:ctrl][mod:alt][combat] show; hide", fontSize = "medium", order = 1 },
-		ex2 = { type = "description", name = "Ex 2: Pet Action Bar: [mod:ctrl] show; hide", fontSize = "medium", order = 2 },
-		ex3 = { type = "description", name = "Ex 3: Raid Frame:      [mod:ctrl][nocombat] show; hide", fontSize = "medium", order = 3 },
+		ex1 = { type = "description", name = "Ex 1: Action Bar 1: [flying, nocombat] hide; show", fontSize = "medium", order = 1 },
+		ex2 = { type = "description", name = "Ex 2: Action Bar2:  [mod:ctrl][mod:alt][combat] show; hide", fontSize = "medium", order = 2 },
+		ex3 = { type = "description", name = "Ex 3: Raid Frame:   [mod:ctrl][nocombat] show; hide", fontSize = "medium", order = 3 },
 		dinksdefaults = { type = "description", name = "You can save as many profiles as you want, or just use DinksDefaults!", fontSize = "medium", order = 4 },
 		slashCmdTxt = { type = "description", name = "Type '/dinksui help' or '/dui h' in the chat window for more.", fontSize = "medium", order = 5 },
 		blank = { type = "description", name = " ", fontSize = "medium", order = 6 },
@@ -200,6 +200,12 @@ end
 -- at some point it might do more...and I wanted to document all this here.
 function DinksUI:HandleEnteringWorld()
 	self:ReapplyAllFrames()
+	self:Print("Notice: \n" ..
+		"The Default profile currently contains my prefered settings. \n" ..
+		"I've decided to set the Default profile to blank after feedback from you all. \n" ..
+		"Your current settings should be preserved during this switch in a couple weeks. \n" ..
+		"Thank you for using DinksUI! =) \n" ..
+		"\n")
 end
 
 function DinksUI:HandleLeavingWorld()
@@ -221,12 +227,6 @@ function DinksUI:HandleSlashCommand(command)
 			"Tip: Make some macros! =) \n" ..
 			"For help with macro conditionals you can reference: \n" ..
 			"  https://wowpedia.fandom.com/wiki/Macro_conditionals \n" ..
-			"\n")
-		self:Print("\n" ..
-			"Notice: The Default profile currently contains my prefered settings. \n" ..
-			"I've decided to set the Default profile to blank after feedback from you all. \n" ..
-			"Your current settings should be preserved during this switch in a couple weeks. \n" ..
-			"Thank you for using DinksUI! =) \n" ..
 			"\n")
 	elseif cmd == "show" then
 		self:UnregisterAllFrames()
