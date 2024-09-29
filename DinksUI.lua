@@ -164,7 +164,7 @@ function DinksUI:OnInitialize()
 end
 
 function DinksUI:OnEnable()
-	self:SetupDinksDefaults()
+	-- self:SetupDinksDefaults()
 	self:RegisterChatCommand("dui", "HandleSlashCommand")
 	self:RegisterChatCommand("dinksui", "HandleSlashCommand")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "HandleEnteringWorld")
@@ -203,7 +203,8 @@ function DinksUI:SetupDinksDefaults()
 
 	-- Default values don't actually save in the DB. Explicitly set them now.
 	for key, _ in pairs(dinksDefaults) do
-		self.db.profile[key] = self.db.profile[key]
+		self:Print(key .. ": " .. self.db.profile[key])
+		self.db.profile[key] = self.db.profile[key] or ""
 	end
 end
 
