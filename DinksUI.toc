@@ -1,0 +1,11 @@
+## Interface: 110005
+## Title: Dinks' Immersive UI
+## Notes: My custom UI hiding addon.
+## Author: Duenke
+## Version: 1.1.0
+## SavedVariables: DinksUIDB
+## IconTexture: Interface\ICONS\Ability_mage_greaterinvisibility
+
+embeds.xml
+
+DinksUI.lua
