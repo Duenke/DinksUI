@@ -226,13 +226,16 @@ function DinksUI:HandleSlashCommand(command)
 		self:UnregisterAllFrames()
 	elseif cmd == "hide" then
 		self:RegisterAllFrames()
+	elseif cmd == "toggle" then
+		self:ToggleAllFrames()
 	elseif cmd == "h" or cmd == "help" then
 		self:Print("\n" ..
 			"The Default profile is all blanks and can be reset on demand. \n" ..
 			"The DinksDefaults profile is reset on each reload. \n" ..
 			"Type '/dinksui show' or '/dui show' to temporarily show all frames. \n" ..
 			"Type '/dinksui hide' or '/dui hide' to again hide all frames. \n" ..
-			"Tip: Make some macros! =) \n" ..
+			"Type '/dinksui toggle' or '/dui toggle' to toggle all frames on and off. \n" ..
+			"Tip: Use the above commands in your custom macros! =) \n" ..
 			"For help with macro conditionals you can reference: \n" ..
 			"  https://wowpedia.fandom.com/wiki/Macro_conditionals \n" ..
 			"\n")
@@ -246,6 +249,17 @@ function DinksUI:ReapplyAllFrames()
 
 	self:UnregisterAllFrames()
 	self:RegisterAllFrames()
+end
+
+-- Someone asked for a 1-button toggle function. To be used in a macro.
+function DinksUI:ToggleAllFrames()
+	self:Debug("ToggleAllFrames")
+
+	if next(FrameWrapperTable) == nil then
+		self:RegisterAllFrames()
+	else
+		self:UnregisterAllFrames()
+	end
 end
 
 -- This is the main function. This is where new frames can be added.

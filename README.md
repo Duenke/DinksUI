@@ -23,8 +23,10 @@ Dinks' Immersive UI is a World of Warcraft addon designed to enhance your gamepl
 1. Open the settings by typing `/dinksui` or `/dui` in the chat.
 2. Customize the visibility of each frame using regular macro conditionals.
 3. Save your settings and enjoy a clutter-free UI until you need it.
-4. Temporarily toggle on all frames by typing `/dinksui show`. Type `/dinksui hide` to hide the frames again. Type `/dinksui help` or `/dui h` for help.
-5. You can reference [Wowpedia](https://wowpedia.fandom.com/wiki/Macro_conditionals) for help with macro conditionals.
+4. Temporarily toggle on all frames by typing `/dinksui show`. Type `/dinksui hide` to hide the frames again. Type `/dinksui toggle` for a 1-button toggle on and off.
+5. Bind any of the `/` slash commands to your custom macros for easy use!
+6. Type `/dinksui help` or `/dui h` for help.
+7. You can reference [Wowpedia](https://wowpedia.fandom.com/wiki/Macro_conditionals) for help with macro conditionals.
 
 ## Contributing
 
