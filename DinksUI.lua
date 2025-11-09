@@ -7,6 +7,7 @@ DinksUI = LibStub("AceAddon-3.0"):NewAddon("DinksUI", "AceConsole-3.0", "AceEven
 
 local DEBUG = false
 local DEBUG_FRAME = "ObjectiveTrackerFrame"
+local DEBUG_COUNTER = 0
 
 -- WoW's globals that are exposed for addons.
 local _G = _G
@@ -63,7 +64,6 @@ local options = {
 		buffFrame = { type = "input", name = "Buff Frame", desc = "BuffFrame", width = "full", order = 28 },
 		debuffFrame = { type = "input", name = "Debuff Frame", desc = "DebuffFrame", width = "full", order = 29 },
 		experienceBar = { type = "input", name = "Experience Bar", desc = "MainStatusTrackingBarContainer", width = "full", order = 30 },
-		skyRidingBar = { type = "input", name = "Sky Riding Bar", desc = "UIWidgetPowerBarContainerFrame", width = "full", order = 31 },
 	},
 }
 
@@ -94,7 +94,6 @@ local blanks = {
 		buffFrame = "",
 		debuffFrame = "",
 		experienceBar = "",
-		skyRidingBar = "",
 	}
 }
 
@@ -124,7 +123,6 @@ local dinksDefaults = {
 		buffFrame = "",
 		debuffFrame = "",
 		experienceBar = "[mod:ctrl][mod:alt][combat] show; hide",
-		skyRidingBar = "[mod:ctrl][mod:alt][combat] show; hide",
 	}
 }
 
@@ -292,7 +290,6 @@ function DinksUI:RegisterAllFrames()
 	self:Register(frames.buffFrame.desc, conditionals.buffFrame)
 	self:Register(frames.debuffFrame.desc, conditionals.debuffFrame)
 	self:Register(frames.experienceBar.desc, conditionals.experienceBar)
-	self:RegisterSkyRiding(frames.skyRidingBar.desc, conditionals.skyRidingBar)
 end
 
 -- Remember to also add new frames here as well.
@@ -324,7 +321,6 @@ function DinksUI:UnregisterAllFrames()
 	self:Unregister(frames.buffFrame.desc)
 	self:Unregister(frames.debuffFrame.desc)
 	self:Unregister(frames.experienceBar.desc)
-	self:UnregisterSkyRiding(frames.skyRidingBar.desc)
 end
 
 function DinksUI:Register(frameKey, conditionalMacro)
@@ -342,16 +338,6 @@ function DinksUI:Register(frameKey, conditionalMacro)
 
 		_G[frameKey]:SetParent(newParent)
 		RegisterAttributeDriver(newParent, "state-visibility", conditionalMacro)
-	end
-end
-
--- The SkyRidingBar is inside the Encoutner frame, and does not do well if we wrap it in a new parent.
--- The downside of wrapping the whole Encounter frame is that it also hides the achievement toast!
-function DinksUI:RegisterSkyRiding(frameKey, conditionalMacro)
-	self:Debug("Register: SkyRiding", frameKey)
-
-	if string.len(string.trim(conditionalMacro)) > 1 then
-		RegisterAttributeDriver(_G[frameKey], "state-visibility", conditionalMacro)
 	end
 end
 
@@ -374,13 +360,6 @@ function DinksUI:Unregister(frameKey)
 		FrameWrapperTable[frameKey] = nil
 		_G[frameKey]:SetParent(oldParent)
 	end
-end
-
-function DinksUI:UnregisterSkyRiding(frameKey)
-	self:Debug("Unregister: SkyRiding", frameKey)
-
-	UnregisterAttributeDriver(_G[frameKey], "state-visibility")
-	_G[frameKey]:Show()
 end
 
 function DinksUI:UnregisterChat(frameKey)
@@ -440,7 +419,8 @@ end
 function DinksUI:Debug(message, frameKey)
 	if DEBUG then
 		if DEBUG_FRAME == frameKey or DEBUG_FRAME == nil or frameKey == nil then
-			self:Print(_G["ChatFrame6"], message .. "\n ")
+			DEBUG_COUNTER = DEBUG_COUNTER + 1
+			self:Print(_G["ChatFrame1"], DEBUG_COUNTER .. ": " .. message .. "\n ")
 		end
 	end
 end
@@ -453,25 +433,34 @@ end
 -- #region: escape hatches
 ------------------------------------------
 
--- Frustratingly, the game will re-parent the `ObjectiveTrackerFrame` for a few reasons.
--- 1) The player has leveled up. 2) The player is level scaled for TimeWalking instances. 3) ???
--- For these reasons, we need to watch for re-parenting on this frame and re-register it as needed.
+-- Frustratingly, the game will re-parent certain frames for various reasons:
+-- 1) The player has leveled up
+-- 2) The player is level scaled for TimeWalking instances
+-- 3) Other game state changes
+-- For these reasons, we need to watch for re-parenting and re-register frames as needed.
 function DinksUI:HookSetParent(frame, conditionalKey)
-	if not frame.SetParentHooked then
-		hooksecurefunc(frame, "SetParent", function()
-			local frameKey = frame:GetName()
+	-- Prevent multiple hooks on the same frame
+	if frame.SetParentHooked then return end
+	
+	local frameKey = frame:GetName()
+	
+	hooksecurefunc(frame, "SetParent", function()
+		-- Only handle frames that we're currently managing
+		local frameData = FrameWrapperTable[frameKey]
+		if not frameData then return end
 
-			self:Debug("hooksecurefunc: " .. frameKey, frameKey)
-			if FrameWrapperTable[frameKey] then
-				self:Debug("???checking parent: " .. frameKey, frameKey)
-				if FrameWrapperTable[frameKey]['newParent'] ~= _G[frameKey]:GetParent() then
-					self:Debug("!!!resetting parent: " .. frameKey, frameKey)
-					self:Register(frameKey, self.db.profile[conditionalKey])
-				end
-			end
-		end)
-		frame.SetParentHooked = true
-	end
+		-- Check if the frame's parent has been changed by the game
+		local currentParent = _G[frameKey]:GetParent()
+		local expectedParent = frameData.newParent
+
+		if expectedParent ~= currentParent then
+			self:Debug("SetParent hook triggered for: " .. frameKey, frameKey)
+			self:Debug("Parent mismatch detected, re-registering: " .. frameKey, frameKey)
+			self:Register(frameKey, self.db.profile[conditionalKey])
+		end
+	end)
+
+	frame.SetParentHooked = true
 end
 
 ------------------------------------------
