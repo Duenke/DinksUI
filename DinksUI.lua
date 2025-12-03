@@ -40,7 +40,7 @@ local options = {
 		slashCmdTxt = { type = "description", name = "Type '/dinksui help' or '/dui h' in the chat window for more.", fontSize = "medium", order = 5 },
 		blank = { type = "description", name = " ", fontSize = "medium", order = 6 },
 
-		actionBar1 = { type = "input", name = "Action Bar 1", desc = "MainMenuBar", width = "full", order = 7 },
+		actionBar1 = { type = "input", name = "Action Bar 1", desc = "MainActionBar", width = "full", order = 7 },
 		actionBar2 = { type = "input", name = "Action Bar 2", desc = "MultiBarBottomLeft", width = "full", order = 8 },
 		actionBar3 = { type = "input", name = "Action Bar 3", desc = "MultiBarBottomRight", width = "full", order = 9 },
 		actionBar4 = { type = "input", name = "Action Bar 4", desc = "MultiBarRight", width = "full", order = 10 },
