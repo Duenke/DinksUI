@@ -403,15 +403,15 @@ function DinksUI:CreateNewParentFrame(frameKey)
 	fadeOutAlpha:SetDuration(0.5)
 	fadeOutAlpha:SetSmoothing("OUT")
 
-	newParent:SetScript("OnShow", function(self)
-		fadeOut:Stop()
-		fadeIn:Play()
-	end)
+	-- newParent:SetScript("OnShow", function(self)
+	-- 	fadeOut:Stop()
+	-- 	fadeIn:Play()
+	-- end)
 
-	newParent:SetScript("OnHide", function(self)
-		fadeIn:Stop()
-		fadeOut:Play()
-	end)
+	-- newParent:SetScript("OnHide", function(self)
+	-- 	fadeIn:Stop()
+	-- 	fadeOut:Play()
+	-- end)
 
 	return newParent
 end
