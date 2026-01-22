@@ -64,6 +64,7 @@ local options = {
 		buffFrame = { type = "input", name = "Buff Frame", desc = "BuffFrame", width = "full", order = 28 },
 		debuffFrame = { type = "input", name = "Debuff Frame", desc = "DebuffFrame", width = "full", order = 29 },
 		experienceBar = { type = "input", name = "Experience Bar", desc = "MainStatusTrackingBarContainer", width = "full", order = 30 },
+		personResource = { type = "input", name = "Personal Resource Display", desc = "PersonalResourceDisplayFrame", width = "full", order = 31 },
 	},
 }
 
@@ -94,6 +95,7 @@ local blanks = {
 		buffFrame = "",
 		debuffFrame = "",
 		experienceBar = "",
+		personResource = "",
 	}
 }
 
@@ -123,6 +125,7 @@ local dinksDefaults = {
 		buffFrame = "",
 		debuffFrame = "",
 		experienceBar = "[mod:ctrl][mod:alt][combat] show; hide",
+		personResource = "[mod:ctrl][mod:alt][combat] show; hide",
 	}
 }
 
@@ -290,6 +293,7 @@ function DinksUI:RegisterAllFrames()
 	self:Register(frames.buffFrame.desc, conditionals.buffFrame)
 	self:Register(frames.debuffFrame.desc, conditionals.debuffFrame)
 	self:Register(frames.experienceBar.desc, conditionals.experienceBar)
+	self:Register(frames.personResource.desc, conditionals.personResource)
 end
 
 -- Remember to also add new frames here as well.
@@ -321,6 +325,7 @@ function DinksUI:UnregisterAllFrames()
 	self:Unregister(frames.buffFrame.desc)
 	self:Unregister(frames.debuffFrame.desc)
 	self:Unregister(frames.experienceBar.desc)
+	self:Unregister(frames.personResource.desc)
 end
 
 function DinksUI:Register(frameKey, conditionalMacro)
@@ -403,6 +408,8 @@ function DinksUI:CreateNewParentFrame(frameKey)
 	fadeOutAlpha:SetDuration(0.5)
 	fadeOutAlpha:SetSmoothing("OUT")
 
+	-- Something about the addon purge is indirectly throwing exceptions with fading.
+	-- Maybe I'll find a fix at some point.
 	-- newParent:SetScript("OnShow", function(self)
 	-- 	fadeOut:Stop()
 	-- 	fadeIn:Play()
