@@ -65,6 +65,7 @@ local options = {
 		debuffFrame = { type = "input", name = "Debuff Frame", desc = "DebuffFrame", width = "full", order = 29 },
 		experienceBar = { type = "input", name = "Experience Bar", desc = "MainStatusTrackingBarContainer", width = "full", order = 30 },
 		personResource = { type = "input", name = "Personal Resource Display", desc = "PersonalResourceDisplayFrame", width = "full", order = 31 },
+		damageMeter = { type = "input", name = "Damage Meters", desc = "DamageMeter", width = "full", order = 32 },
 	},
 }
 
@@ -96,6 +97,7 @@ local blanks = {
 		debuffFrame = "",
 		experienceBar = "",
 		personResource = "",
+		damageMeter = "",
 	}
 }
 
@@ -114,9 +116,9 @@ local dinksDefaults = {
 		playerFrame = "[mod:ctrl] show; hide",
 		targetFrame = "[mod:ctrl] show; hide",
 		focusFrame = "",
-		petFrame = "[mod:alt, @pet][mod:ctrl, @pet][combat] show; hide",
+		petFrame = "[mod:ctrl, @pet][mod:alt, @pet][combat] show; hide",
 		raidFrame = "[mod:ctrl][nocombat] show; hide",
-		partyFrame = "",
+		partyFrame = "[mod, nocombat][mod:ctrl, combat] hide; show",
 		objectiveTracker = "[mod:ctrl][mod:alt, nocombat] show; hide",
 		chatFrame = "",
 		minimap = "",
@@ -126,6 +128,7 @@ local dinksDefaults = {
 		debuffFrame = "",
 		experienceBar = "[mod:ctrl][mod:alt][combat] show; hide",
 		personResource = "[mod:ctrl][mod:alt][combat] show; hide",
+		damageMeter = "[group, nomod][group, nomod:ctrl, combat] show; hide",
 	}
 }
 
@@ -294,6 +297,7 @@ function DinksUI:RegisterAllFrames()
 	self:Register(frames.debuffFrame.desc, conditionals.debuffFrame)
 	self:Register(frames.experienceBar.desc, conditionals.experienceBar)
 	self:Register(frames.personResource.desc, conditionals.personResource)
+	self:Register(frames.damageMeter.desc, conditionals.damageMeter)
 end
 
 -- Remember to also add new frames here as well.
@@ -326,6 +330,7 @@ function DinksUI:UnregisterAllFrames()
 	self:Unregister(frames.debuffFrame.desc)
 	self:Unregister(frames.experienceBar.desc)
 	self:Unregister(frames.personResource.desc)
+	self:Unregister(frames.damageMeter.desc)
 end
 
 function DinksUI:Register(frameKey, conditionalMacro)
