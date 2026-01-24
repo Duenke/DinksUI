@@ -12,6 +12,35 @@ Dinks' Immersive UI is a World of Warcraft addon designed to enhance your gamepl
 - Default settings profile is all blanks (no hiding by deault)
 - DinksDefaults settings profile based on personal usage
 
+## Supported Frames
+
+- Action Bar 1
+- Action Bar 2
+- Action Bar 3
+- Action Bar 4
+- Action Bar 5
+- Action Bar 6
+- Action Bar 7
+- Action Bar 8
+- Pet Action Bar
+- Stance Bar
+- Player Frame
+- Target Frame
+- Focus Frame
+- Pet Frame
+- Raid Frame
+- Party Frame (!Hiding this inside instances will cause errors right now!)
+- Objective Tracker
+- Chat Frame
+- Minimap
+- Bags Bar
+- Micro Menu
+- Buff Frame
+- Debuff Frame
+- Experience Bar
+- Personal Resource Display
+- Damage Meters
+
 ## Installation
 
 1. Download the latest version from [CurseForge](https://www.curseforge.com/wow/addons/dinksui).
