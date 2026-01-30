@@ -22,6 +22,7 @@ local UnregisterAttributeDriver = UnregisterAttributeDriver
 
 -- Some frames don't handle it well when we trigger their `Hide` and `Show` methods.
 -- So we will just wrap them in new frames that will hide/show just fine.
+local duiToggledOff = false
 local FrameWrapperTable = {}
 
 -- An AceConfig schema options object.
@@ -259,7 +260,7 @@ end
 function DinksUI:ToggleAllFrames()
 	self:Debug("ToggleAllFrames")
 
-	if next(FrameWrapperTable) == nil then
+	if duiToggledOff then
 		self:RegisterAllFrames()
 	else
 		self:UnregisterAllFrames()
@@ -269,6 +270,8 @@ end
 -- This is the main function. This is where new frames can be added.
 function DinksUI:RegisterAllFrames()
 	self:Debug("RegisterAllFrames")
+
+	duiToggledOff = false
 
 	local frames = options.args
 	local conditionals = self.db.profile
@@ -303,6 +306,8 @@ end
 -- Remember to also add new frames here as well.
 function DinksUI:UnregisterAllFrames()
 	self:Debug("UnregisterAllFrames")
+
+	duiToggledOff = true
 
 	local frames = options.args
 	self:Unregister(frames.actionBar1.desc)
@@ -431,13 +436,11 @@ function DinksUI:HookSetParent(frame, conditionalKey)
 	local frameKey = frame:GetName()
 	
 	hooksecurefunc(frame, "SetParent", function()
-		-- Only handle frames that we're currently managing
-		local frameData = FrameWrapperTable[frameKey]
-		if not frameData then return end
+		if duiToggledOff then return end
 
 		-- Check if the frame's parent has been changed by the game
 		local currentParent = _G[frameKey]:GetParent()
-		local expectedParent = frameData.newParent
+		local expectedParent = FrameWrapperTable[frameKey].newParent
 
 		if expectedParent ~= currentParent then
 			self:Debug("SetParent hook triggered for: " .. frameKey, frameKey)
@@ -446,6 +449,7 @@ function DinksUI:HookSetParent(frame, conditionalKey)
 		end
 	end)
 
+	self:Debug("Permanent SetParent hook installed for: " .. frameKey, frameKey)
 	frame.SetParentHooked = true
 end
 
