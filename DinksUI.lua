@@ -6,7 +6,7 @@ DinksUI = LibStub("AceAddon-3.0"):NewAddon("DinksUI", "AceConsole-3.0", "AceEven
 ------------------------------------------
 
 local DEBUG = false
-local DEBUG_FRAME = "ObjectiveTrackerFrame"
+local DEBUG_FRAME = nil
 local DEBUG_COUNTER = 0
 
 -- WoW's globals that are exposed for addons.
@@ -367,7 +367,6 @@ function DinksUI:Unregister(frameKey)
 
 	if FrameWrapperTable[frameKey] then
 		local oldParent = FrameWrapperTable[frameKey]['oldParent']
-		FrameWrapperTable[frameKey] = nil
 		_G[frameKey]:SetParent(oldParent)
 	end
 end
@@ -396,34 +395,9 @@ end
 function DinksUI:CreateNewParentFrame(frameKey)
 	self:Debug("CreateNewParentFrame: " .. frameKey, frameKey)
 
-	local newParent = CreateFrame("Frame", nil, UIParent, "SecureHandlerStateTemplate")
-	-- Set up fade-in and fade-out animations
-	local fadeIn = newParent:CreateAnimationGroup()
-	local fadeInAlpha = fadeIn:CreateAnimation("Alpha")
-	fadeInAlpha:SetFromAlpha(0)
-	fadeInAlpha:SetToAlpha(1)
-	fadeInAlpha:SetDuration(0.125)
-	fadeInAlpha:SetSmoothing("IN")
-
-	-- Fade-out animations don't seem to work with this method of hiding frames...
-	local fadeOut = newParent:CreateAnimationGroup()
-	local fadeOutAlpha = fadeOut:CreateAnimation("Alpha")
-	fadeOutAlpha:SetFromAlpha(1)
-	fadeOutAlpha:SetToAlpha(0)
-	fadeOutAlpha:SetDuration(0.5)
-	fadeOutAlpha:SetSmoothing("OUT")
-
-	-- Something about the addon purge is indirectly throwing exceptions with fading.
-	-- Maybe I'll find a fix at some point.
-	-- newParent:SetScript("OnShow", function(self)
-	-- 	fadeOut:Stop()
-	-- 	fadeIn:Play()
-	-- end)
-
-	-- newParent:SetScript("OnHide", function(self)
-	-- 	fadeIn:Stop()
-	-- 	fadeOut:Play()
-	-- end)
+	local parentName = "DinksUI_" .. frameKey
+	local newParent = CreateFrame("Frame", parentName, UIParent, "SecureHandlerStateTemplate")
+	newParent:SetFrameStrata("MEDIUM")
 
 	return newParent
 end
