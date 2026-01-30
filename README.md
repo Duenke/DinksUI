@@ -1,8 +1,12 @@
-# Dinks' Immersive UI
+>In 12.0.0, hiding party frames during instanced combat is causing errors.
+>Even though DinksUI doesn't access any secrets directly, there's some kind of knock-on effect from hiding/showing these.
+>I don't know if these kinds of issues will be cleared up by Blizz over time.
+
+# Dink's Immersive UI
 
 ## Description
 
-Dinks' Immersive UI is a World of Warcraft addon designed to enhance your gameplay experience by clearing up the UI until you need to see the UI elements. It allows you to customize which frames are shown or hidden based on your preferences. You can use regular macro conditionals to control the visibility of each frame.
+Dink's Immersive UI is a World of Warcraft addon designed to enhance your gameplay experience by clearing up the UI until you need to see the UI elements. It allows you to customize which frames are shown or hidden based on your preferences. You can use regular macro conditionals to control the visibility of each frame.
 
 ## Features
 
@@ -59,10 +63,10 @@ Dinks' Immersive UI is a World of Warcraft addon designed to enhance your gamepl
 
 ## Contributing
 
-Contributions to Dinks' Immersive UI are welcome! If you encounter any issues or have suggestions for improvements, please open an issue on the [GitHub repository](https://github.com/Duenke/DinksUI/issues).
+Contributions to Dink's Immersive UI are welcome! If you encounter any issues or have suggestions for improvements, please open an issue on the [GitHub repository](https://github.com/Duenke/DinksUI/issues).
 
 See [Contributing](./Contributing.md) for more.
 
 ## License
 
-Dinks' Immersive UI is released under the [MIT License](https://opensource.org/licenses/MIT).
+Dink's Immersive UI is released under the [MIT License](https://opensource.org/licenses/MIT).
