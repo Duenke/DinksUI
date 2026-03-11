@@ -67,6 +67,7 @@ local options = {
 		experienceBar = { type = "input", name = "Experience Bar", desc = "MainStatusTrackingBarContainer", width = "full", order = 30 },
 		personResource = { type = "input", name = "Personal Resource Display", desc = "PersonalResourceDisplayFrame", width = "full", order = 31 },
 		damageMeter = { type = "input", name = "Damage Meters", desc = "DamageMeter", width = "full", order = 32 },
+		bossFrames = { type = "input", name = "Boss Frames", desc = "BossTargetFrameContainer", width = "full", order = 33 },
 	},
 }
 
@@ -99,6 +100,7 @@ local blanks = {
 		experienceBar = "",
 		personResource = "",
 		damageMeter = "",
+		bossFrames = "",
 	}
 }
 
@@ -107,17 +109,17 @@ local dinksDefaults = {
 		actionBar1 = "[mod:ctrl][mod:alt][combat] show; hide",
 		actionBar2 = "[mod:ctrl][mod:alt][combat] show; hide",
 		actionBar3 = "[mod:ctrl][mod:alt][combat] show; hide",
-		actionBar4 = "[mod:ctrl] show; hide",
-		actionBar5 = "[mod:ctrl] show; hide",
+		actionBar4 = "[mod:ctrl][mod:alt, nocombat] show; hide",
+		actionBar5 = "[mod:ctrl][mod:alt, nocombat] show; hide",
 		actionBar6 = "",
 		actionBar7 = "",
 		actionBar8 = "",
-		petActionBar = "[mod:ctrl, @pet, exists] show; hide",
+		petActionBar = "[mod:ctrl] show; hide",
 		stanceBar = "[mod:ctrl][mod:alt][combat] show; hide",
 		playerFrame = "[mod:ctrl] show; hide",
 		targetFrame = "[mod:ctrl] show; hide",
 		focusFrame = "",
-		petFrame = "[mod:ctrl, @pet][mod:alt, @pet][combat] show; hide",
+		petFrame = "[mod:ctrl][mod:alt][combat] show; hide",
 		raidFrame = "[mod:ctrl][nocombat] show; hide",
 		partyFrame = "",
 		objectiveTracker = "[mod:ctrl][mod:alt, nocombat] show; hide",
@@ -130,6 +132,7 @@ local dinksDefaults = {
 		experienceBar = "[mod:ctrl][mod:alt][combat] show; hide",
 		personResource = "[mod:ctrl][mod:alt][combat] show; hide",
 		damageMeter = "[group, nomod][group, nomod:ctrl, combat] show; hide",
+		bossFrames = "[mod:ctrl] show; hide",
 	}
 }
 
@@ -301,6 +304,7 @@ function DinksUI:RegisterAllFrames()
 	self:Register(frames.experienceBar.desc, conditionals.experienceBar)
 	self:Register(frames.personResource.desc, conditionals.personResource)
 	self:Register(frames.damageMeter.desc, conditionals.damageMeter)
+	self:Register(frames.bossFrames.desc, conditionals.bossFrames)
 end
 
 -- Remember to also add new frames here as well.
@@ -336,6 +340,7 @@ function DinksUI:UnregisterAllFrames()
 	self:Unregister(frames.experienceBar.desc)
 	self:Unregister(frames.personResource.desc)
 	self:Unregister(frames.damageMeter.desc)
+	self:Unregister(frames.bossFrames.desc)
 end
 
 function DinksUI:Register(frameKey, conditionalMacro)
@@ -432,9 +437,9 @@ end
 function DinksUI:HookSetParent(frame, conditionalKey)
 	-- Prevent multiple hooks on the same frame
 	if frame.SetParentHooked then return end
-	
+
 	local frameKey = frame:GetName()
-	
+
 	hooksecurefunc(frame, "SetParent", function()
 		if duiToggledOff then return end
 
@@ -455,4 +460,18 @@ end
 
 ------------------------------------------
 -- #endregion: escape hatches
+------------------------------------------
+
+------------------------------------------
+-- #region: external integrations
+------------------------------------------
+
+-- The Plumber addon scans other addons' toc files to include them in it's Addon Compartment.
+-- It looks for a line like `## AddonCompartmentFunc: DinksUI_AddonCompartmentOnClick` in DinksUI.toc.
+function DinksUI_AddonCompartmentOnClick()
+    DinksUI:ToggleAllFrames()
+end
+
+------------------------------------------
+-- #endregion: external integrations
 ------------------------------------------
