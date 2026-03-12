@@ -444,13 +444,19 @@ function DinksUI:HookSetParent(frame, conditionalKey)
 		if duiToggledOff then return end
 
 		-- Check if the frame's parent has been changed by the game
+		local wrapper = FrameWrapperTable[frameKey]
 		local currentParent = _G[frameKey]:GetParent()
-		local expectedParent = FrameWrapperTable[frameKey].newParent
 
-		if expectedParent ~= currentParent then
-			self:Debug("SetParent hook triggered for: " .. frameKey, frameKey)
-			self:Debug("Parent mismatch detected, re-registering: " .. frameKey, frameKey)
-			self:Register(frameKey, self.db.profile[conditionalKey])
+		if wrapper then
+    		local expectedParent = wrapper['newParent']
+
+    		if expectedParent ~= currentParent then
+    			self:Debug("SetParent hook triggered for: " .. frameKey, frameKey)
+    			self:Debug("Parent mismatch detected, re-registering: " .. frameKey, frameKey)
+    			self:Register(frameKey, self.db.profile[conditionalKey])
+    		end
+        else
+            self:Debug("SetParent hook FAILED for: " .. frameKey, frameKey)
 		end
 	end)
 
