@@ -50,7 +50,9 @@ local options = {
                     fontSize = "medium",
                     name =
                         "|cffffd200How It Works|r\n" ..
-                        "Enter a |cff00ccffmacro conditional|r to control when a frame is hidden or shown.\n\n" ..
+                        "Enter a |cff00ccffmacro conditional|r to control when a frame is hidden or shown.\n" ..
+                        "The |cff00ccffDefault|r profile comes blank.\n" ..
+                        "Just work with the |cff00ccffDefault|r profile, create |cff00ccffmultiple profiles|r, or try out the |cff00ccffDinksDefaults|r profile.\n\n" ..
 
                         "|cffffd200Syntax|r\n" ..
                         "[condition] show; hide\n" ..
