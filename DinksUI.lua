@@ -27,48 +27,116 @@ local FrameWrapperTable = {}
 
 -- An AceConfig schema options object.
 local options = {
-	name = "DinksUI",
-	handler = DinksUI,
-	type = 'group',
-	get = "GetValue",
-	set = "SetValue",
-	args = {
-		info = { type = "description", name = "For each frame below that you want to hide, supply a macro conditional of your chosing.", fontSize = "medium", order = 0 },
-		ex1 = { type = "description", name = "Ex 1: Action Bar 1: [flying, nocombat] hide; show", fontSize = "medium", order = 1 },
-		ex2 = { type = "description", name = "Ex 2: Action Bar2:  [mod:ctrl][mod:alt][combat] show; hide", fontSize = "medium", order = 2 },
-		ex3 = { type = "description", name = "Ex 3: Raid Frame:   [mod:ctrl][nocombat] show; hide", fontSize = "medium", order = 3 },
-		dinksdefaults = { type = "description", name = "You can save as many profiles as you want, or just use DinksDefaults!", fontSize = "medium", order = 4 },
-		slashCmdTxt = { type = "description", name = "Type '/dinksui help' or '/dui h' in the chat window for more.", fontSize = "medium", order = 5 },
-		blank = { type = "description", name = " ", fontSize = "medium", order = 6 },
+    name = "DinksUI",
+    handler = DinksUI,
+    type = "group",
+    childGroups = "tab",
+    get = "GetValue",
+    set = "SetValue",
+    args = {
+        help = {
+            type = "group",
+            name = "Help",
+            order = 0,
+            args = {
+                title = {
+                    type = "header",
+                    name = "DinksUI Conditional Visibility Guide",
+                    order = 0
+                },
+                guide = {
+                    type = "description",
+                    order = 1,
+                    fontSize = "medium",
+                    name =
+                        "|cffffd200How It Works|r\n" ..
+                        "Enter a |cff00ccffmacro conditional|r to control when a frame is hidden or shown.\n\n" ..
 
-		actionBar1 = { type = "input", name = "Action Bar 1", desc = "MainActionBar", width = "full", order = 7 },
-		actionBar2 = { type = "input", name = "Action Bar 2", desc = "MultiBarBottomLeft", width = "full", order = 8 },
-		actionBar3 = { type = "input", name = "Action Bar 3", desc = "MultiBarBottomRight", width = "full", order = 9 },
-		actionBar4 = { type = "input", name = "Action Bar 4", desc = "MultiBarRight", width = "full", order = 10 },
-		actionBar5 = { type = "input", name = "Action Bar 5", desc = "MultiBarLeft", width = "full", order = 11 },
-		actionBar6 = { type = "input", name = "Action Bar 6", desc = "MultiBar5", width = "full", order = 12 },
-		actionBar7 = { type = "input", name = "Action Bar 7", desc = "MultiBar6", width = "full", order = 13 },
-		actionBar8 = { type = "input", name = "Action Bar 8", desc = "MultiBar7", width = "full", order = 14 },
-		petActionBar = { type = "input", name = "Pet Action Bar", desc = "PetActionBar", width = "full", order = 15 },
-		stanceBar = { type = "input", name = "Stance Bar", desc = "StanceBar", width = "full", order = 16 },
-		playerFrame = { type = "input", name = "Player Frame", desc = "PlayerFrame", width = "full", order = 17 },
-		targetFrame = { type = "input", name = "Target Frame", desc = "TargetFrame", width = "full", order = 18 },
-		focusFrame = { type = "input", name = "Focus Frame", desc = "FocusFrame", width = "full", order = 19 },
-		petFrame = { type = "input", name = "Pet Frame", desc = "PetFrame", width = "full", order = 20 },
-		raidFrame = { type = "input", name = "Raid Frame", desc = "CompactRaidFrameContainer", width = "full", order = 21 },
-		partyFrame = { type = "input", name = "Party Frame (!Hiding this inside instances will cause errors right now!)", desc = "PartyFrame", width = "full", order = 22 },
-		objectiveTracker = { type = "input", name = "Objective Tracker", desc = "ObjectiveTrackerFrame", width = "full", order = 23 },
-		chatFrame = { type = "input", name = "Chat Frame", desc = "ChatFrame", width = "full", order = 24 },
-		minimap = { type = "input", name = "Minimap", desc = "MinimapCluster", width = "full", order = 25 },
-		bagsBar = { type = "input", name = "Bags Bar", desc = "BagsBar", width = "full", order = 26 },
-		microMenu = { type = "input", name = "Micro Menu", desc = "MicroMenuContainer", width = "full", order = 27 },
-		buffFrame = { type = "input", name = "Buff Frame", desc = "BuffFrame", width = "full", order = 28 },
-		debuffFrame = { type = "input", name = "Debuff Frame", desc = "DebuffFrame", width = "full", order = 29 },
-		experienceBar = { type = "input", name = "Experience Bar", desc = "MainStatusTrackingBarContainer", width = "full", order = 30 },
-		personResource = { type = "input", name = "Personal Resource Display", desc = "PersonalResourceDisplayFrame", width = "full", order = 31 },
-		damageMeter = { type = "input", name = "Damage Meters", desc = "DamageMeter", width = "full", order = 32 },
-		bossFrames = { type = "input", name = "Boss Frames", desc = "BossTargetFrameContainer", width = "full", order = 33 },
-	},
+                        "|cffffd200Syntax|r\n" ..
+                        "[condition] show; hide\n" ..
+                        "[condition] hide; show\n\n" ..
+
+                        "|cffffd200Examples|r\n" ..
+                        "|cff00ff00Action Bar 1|r\n" ..
+                        "  [flying, nocombat] hide; show\n\n" ..
+
+                        "|cff00ff00Action Bar 2|r\n" ..
+                        "  [mod:ctrl][mod:alt][combat] show; hide\n\n" ..
+
+                        "|cff00ff00Raid Frame|r\n" ..
+                        "  [mod:ctrl][nocombat] show; hide\n\n" ..
+
+                        "|cff00ff00Damage Meters|r\n" ..
+                        "  [group, nomod][group, nomod:ctrl, combat] show; hide\n\n" ..
+
+                        "|cffffd200Tips|r\n" ..
+                        "• Use hold |cff00ccffCTRL|r or |cff00ccffALT|r to temporarily show UI elements.\n" ..
+                        "• Use |cff00ccffcombat|r or |cff00ccffnocombat|r conditions for combat visibility.\n" ..
+                        "• Multiple conditions can be chained together.\n" ..
+                        "• Multiple frames can be overlapping if they show at different times.\n" ..
+                        "• Create macros with the below slash commands.\n" ..
+                        "• Now integrated with Plumber's addon compartment!\n\n" ..
+
+                        "|cffffd200Commands|r\n" ..
+                        "|cff00ccff/dinksui|r or |cff00ccff/dui|r\n" ..
+                        "|cff00ccff/dinksui show|r or |cff00ccff/dui show|r\n" ..
+                        "|cff00ccff/dinksui hide|r or |cff00ccff/dui hide|r\n" ..
+                        "|cff00ccff/dinksui toggle|r or |cff00ccff/dui toggle|r\n\n" ..
+
+                        "For help with macro conditionals you can reference:\n" ..
+                        "|cff00ccffhttps://wowpedia.fandom.com/wiki/Macro_conditionals|r"
+                }
+            }
+        },
+        actionbars = {
+            type = "group",
+            name = "Action Bars",
+            order = 1,
+            args = {
+                actionBar1 =   { type = "input", name = "Action Bar 1",   desc = "MainActionBar",       width = "full" },
+                actionBar2 =   { type = "input", name = "Action Bar 2",   desc = "MultiBarBottomLeft",  width = "full" },
+                actionBar3 =   { type = "input", name = "Action Bar 3",   desc = "MultiBarBottomRight", width = "full" },
+                actionBar4 =   { type = "input", name = "Action Bar 4",   desc = "MultiBarRight",       width = "full" },
+                actionBar5 =   { type = "input", name = "Action Bar 5",   desc = "MultiBarLeft",        width = "full" },
+                actionBar6 =   { type = "input", name = "Action Bar 6",   desc = "MultiBar5",           width = "full" },
+                actionBar7 =   { type = "input", name = "Action Bar 7",   desc = "MultiBar6",           width = "full" },
+                actionBar8 =   { type = "input", name = "Action Bar 8",   desc = "MultiBar7",           width = "full" },
+                petActionBar = { type = "input", name = "Pet Action Bar", desc = "PetActionBar",        width = "full" },
+                stanceBar =    { type = "input", name = "Stance Bar",     desc = "StanceBar",           width = "full" },
+            }
+        },
+        unitframes = {
+            type = "group",
+            name = "Unit Frames",
+            order = 2,
+            args = {
+                bossFrames =  { type = "input", name = "Boss Frames",  desc = "BossTargetFrameContainer",  width = "full" },
+                focusFrame =  { type = "input", name = "Focus Frame",  desc = "FocusFrame",                width = "full" },
+                partyFrame =  { type = "input", name = "Party Frame",  desc = "PartyFrame",                width = "full" },
+                petFrame =    { type = "input", name = "Pet Frame",    desc = "PetFrame",                  width = "full" },
+                playerFrame = { type = "input", name = "Player Frame", desc = "PlayerFrame",               width = "full" },
+                raidFrame =   { type = "input", name = "Raid Frame",   desc = "CompactRaidFrameContainer", width = "full" },
+                targetFrame = { type = "input", name = "Target Frame", desc = "TargetFrame",               width = "full" },
+            }
+        },
+        interface = {
+            type = "group",
+            name = "Interface",
+            order = 3,
+            args = {
+                bagsBar =          { type = "input", name = "Bags Bar",                  desc = "BagsBar",                        width = "full" },
+                buffFrame =        { type = "input", name = "Buff Frame",                desc = "BuffFrame",                      width = "full" },
+                chatFrame =        { type = "input", name = "Chat Frame",                desc = "ChatFrame",                      width = "full" },
+                damageMeter =      { type = "input", name = "Damage Meters",             desc = "DamageMeter",                    width = "full" },
+                debuffFrame =      { type = "input", name = "Debuff Frame",              desc = "DebuffFrame",                    width = "full" },
+                experienceBar =    { type = "input", name = "Experience Bar",            desc = "MainStatusTrackingBarContainer", width = "full" },
+                microMenu =        { type = "input", name = "Micro Menu",                desc = "MicroMenuContainer",             width = "full" },
+                minimap =          { type = "input", name = "Minimap",                   desc = "MinimapCluster",                 width = "full" },
+                objectiveTracker = { type = "input", name = "Objective Tracker",         desc = "ObjectiveTrackerFrame",          width = "full" },
+                personResource =   { type = "input", name = "Personal Resource Display", desc = "PersonalResourceDisplayFrame",   width = "full" },
+            }
+        }
+    }
 }
 
 -- Default options match a subset of the `options.args` above.
@@ -84,23 +152,25 @@ local blanks = {
 		actionBar8 = "",
 		petActionBar = "",
 		stanceBar = "",
-		playerFrame = "",
-		targetFrame = "",
+
+		bossFrames = "",
 		focusFrame = "",
-		petFrame = "",
-		raidFrame = "",
 		partyFrame = "",
-		objectiveTracker = "",
-		chatFrame = "",
-		minimap = "",
+		petFrame = "",
+		playerFrame = "",
+		raidFrame = "",
+		targetFrame = "",
+
 		bagsBar = "",
-		microMenu = "",
 		buffFrame = "",
+		chatFrame = "",
+		damageMeter = "",
 		debuffFrame = "",
 		experienceBar = "",
+		microMenu = "",
+		minimap = "",
+		objectiveTracker = "",
 		personResource = "",
-		damageMeter = "",
-		bossFrames = "",
 	}
 }
 
@@ -116,23 +186,25 @@ local dinksDefaults = {
 		actionBar8 = "",
 		petActionBar = "[mod:ctrl] show; hide",
 		stanceBar = "[mod:ctrl][mod:alt][combat] show; hide",
-		playerFrame = "[mod:ctrl] show; hide",
-		targetFrame = "[mod:ctrl] show; hide",
+
+		bossFrames = "[mod:ctrl] show; hide",
 		focusFrame = "",
-		petFrame = "[mod:ctrl][mod:alt][combat] show; hide",
-		raidFrame = "[mod:ctrl][nocombat] show; hide",
 		partyFrame = "",
-		objectiveTracker = "[mod:ctrl][mod:alt, nocombat] show; hide",
-		chatFrame = "",
-		minimap = "",
+		petFrame = "[mod:ctrl][mod:alt][combat] show; hide",
+		playerFrame = "[mod:ctrl] show; hide",
+		raidFrame = "[mod:ctrl][nocombat] show; hide",
+		targetFrame = "[mod:ctrl] show; hide",
+
 		bagsBar = "[mod:ctrl] show; hide",
-		microMenu = "[mod:ctrl] show; hide",
 		buffFrame = "",
+		chatFrame = "",
+		damageMeter = "[group, nomod][group, nomod:ctrl, combat] show; hide",
 		debuffFrame = "",
 		experienceBar = "[mod:ctrl][mod:alt][combat] show; hide",
+		microMenu = "[mod:ctrl] show; hide",
+		minimap = "",
+		objectiveTracker = "[mod:ctrl][mod:alt, nocombat] show; hide",
 		personResource = "[mod:ctrl][mod:alt][combat] show; hide",
-		damageMeter = "[group, nomod][group, nomod:ctrl, combat] show; hide",
-		bossFrames = "[mod:ctrl] show; hide",
 	}
 }
 
@@ -236,17 +308,6 @@ function DinksUI:HandleSlashCommand(command)
 		self:RegisterAllFrames()
 	elseif cmd == "toggle" then
 		self:ToggleAllFrames()
-	elseif cmd == "h" or cmd == "help" then
-		self:Print("\n" ..
-			"The Default profile is all blanks and can be reset on demand. \n" ..
-			"The DinksDefaults profile is reset on each reload. \n" ..
-			"Type '/dinksui show' or '/dui show' to temporarily show all frames. \n" ..
-			"Type '/dinksui hide' or '/dui hide' to again hide all frames. \n" ..
-			"Type '/dinksui toggle' or '/dui toggle' to toggle all frames on and off. \n" ..
-			"Tip: Use the above commands in your custom macros! =) \n" ..
-			"For help with macro conditionals you can reference: \n" ..
-			"  https://wowpedia.fandom.com/wiki/Macro_conditionals \n" ..
-			"\n")
 	else
 		self:Print("Command not found '" .. command .. "'")
 	end
@@ -276,35 +337,39 @@ function DinksUI:RegisterAllFrames()
 
 	duiToggledOff = false
 
-	local frames = options.args
 	local conditionals = self.db.profile
-	self:Register(frames.actionBar1.desc, conditionals.actionBar1)
-	self:Register(frames.actionBar2.desc, conditionals.actionBar2)
-	self:Register(frames.actionBar3.desc, conditionals.actionBar3)
-	self:Register(frames.actionBar4.desc, conditionals.actionBar4)
-	self:Register(frames.actionBar5.desc, conditionals.actionBar5)
-	self:Register(frames.actionBar6.desc, conditionals.actionBar6)
-	self:Register(frames.actionBar7.desc, conditionals.actionBar7)
-	self:Register(frames.actionBar8.desc, conditionals.actionBar8)
-	self:Register(frames.petActionBar.desc, conditionals.petActionBar)
-	self:Register(frames.stanceBar.desc, conditionals.stanceBar)
-	self:Register(frames.playerFrame.desc, conditionals.playerFrame)
-	self:Register(frames.targetFrame.desc, conditionals.targetFrame)
-	self:Register(frames.focusFrame.desc, conditionals.focusFrame)
-	self:Register(frames.petFrame.desc, conditionals.petFrame)
-	self:Register(frames.raidFrame.desc, conditionals.raidFrame)
-	self:Register(frames.partyFrame.desc, conditionals.partyFrame)
-	self:Register(frames.objectiveTracker.desc, conditionals.objectiveTracker)
-	self:RegisterChat(frames.chatFrame.desc, conditionals.chatFrame)
-	self:Register(frames.minimap.desc, conditionals.minimap)
-	self:Register(frames.bagsBar.desc, conditionals.bagsBar)
-	self:Register(frames.microMenu.desc, conditionals.microMenu)
-	self:Register(frames.buffFrame.desc, conditionals.buffFrame)
-	self:Register(frames.debuffFrame.desc, conditionals.debuffFrame)
-	self:Register(frames.experienceBar.desc, conditionals.experienceBar)
-	self:Register(frames.personResource.desc, conditionals.personResource)
-	self:Register(frames.damageMeter.desc, conditionals.damageMeter)
-	self:Register(frames.bossFrames.desc, conditionals.bossFrames)
+
+	local actionbars = options.args.actionbars.args
+	local unitframes = options.args.unitframes.args
+	local interface = options.args.interface.args
+
+	self:Register(actionbars.actionBar1.desc, conditionals.actionBar1)
+	self:Register(actionbars.actionBar2.desc, conditionals.actionBar2)
+	self:Register(actionbars.actionBar3.desc, conditionals.actionBar3)
+	self:Register(actionbars.actionBar4.desc, conditionals.actionBar4)
+	self:Register(actionbars.actionBar5.desc, conditionals.actionBar5)
+	self:Register(actionbars.actionBar6.desc, conditionals.actionBar6)
+	self:Register(actionbars.actionBar7.desc, conditionals.actionBar7)
+	self:Register(actionbars.actionBar8.desc, conditionals.actionBar8)
+	self:Register(actionbars.petActionBar.desc, conditionals.petActionBar)
+	self:Register(actionbars.stanceBar.desc, conditionals.stanceBar)
+	self:Register(unitframes.playerFrame.desc, conditionals.playerFrame)
+	self:Register(unitframes.targetFrame.desc, conditionals.targetFrame)
+	self:Register(unitframes.focusFrame.desc, conditionals.focusFrame)
+	self:Register(unitframes.petFrame.desc, conditionals.petFrame)
+	self:Register(unitframes.raidFrame.desc, conditionals.raidFrame)
+	self:Register(unitframes.partyFrame.desc, conditionals.partyFrame)
+	self:Register(unitframes.bossFrames.desc, conditionals.bossFrames)
+	self:Register(interface.objectiveTracker.desc, conditionals.objectiveTracker)
+	self:RegisterChat(interface.chatFrame.desc, conditionals.chatFrame)
+	self:Register(interface.minimap.desc, conditionals.minimap)
+	self:Register(interface.bagsBar.desc, conditionals.bagsBar)
+	self:Register(interface.microMenu.desc, conditionals.microMenu)
+	self:Register(interface.buffFrame.desc, conditionals.buffFrame)
+	self:Register(interface.debuffFrame.desc, conditionals.debuffFrame)
+	self:Register(interface.experienceBar.desc, conditionals.experienceBar)
+	self:Register(interface.personResource.desc, conditionals.personResource)
+	self:Register(interface.damageMeter.desc, conditionals.damageMeter)
 end
 
 -- Remember to also add new frames here as well.
@@ -313,34 +378,37 @@ function DinksUI:UnregisterAllFrames()
 
 	duiToggledOff = true
 
-	local frames = options.args
-	self:Unregister(frames.actionBar1.desc)
-	self:Unregister(frames.actionBar2.desc)
-	self:Unregister(frames.actionBar3.desc)
-	self:Unregister(frames.actionBar4.desc)
-	self:Unregister(frames.actionBar5.desc)
-	self:Unregister(frames.actionBar6.desc)
-	self:Unregister(frames.actionBar7.desc)
-	self:Unregister(frames.actionBar8.desc)
-	self:Unregister(frames.petActionBar.desc)
-	self:Unregister(frames.stanceBar.desc)
-	self:Unregister(frames.playerFrame.desc)
-	self:Unregister(frames.targetFrame.desc)
-	self:Unregister(frames.focusFrame.desc)
-	self:Unregister(frames.petFrame.desc)
-	self:Unregister(frames.raidFrame.desc)
-	self:Unregister(frames.partyFrame.desc)
-	self:Unregister(frames.objectiveTracker.desc)
-	self:UnregisterChat(frames.chatFrame.desc)
-	self:Unregister(frames.minimap.desc)
-	self:Unregister(frames.bagsBar.desc)
-	self:Unregister(frames.microMenu.desc)
-	self:Unregister(frames.buffFrame.desc)
-	self:Unregister(frames.debuffFrame.desc)
-	self:Unregister(frames.experienceBar.desc)
-	self:Unregister(frames.personResource.desc)
-	self:Unregister(frames.damageMeter.desc)
-	self:Unregister(frames.bossFrames.desc)
+	local actionbars = options.args.actionbars.args
+	local unitframes = options.args.unitframes.args
+	local interface = options.args.interface.args
+
+	self:Unregister(actionbars.actionBar1.desc)
+	self:Unregister(actionbars.actionBar2.desc)
+	self:Unregister(actionbars.actionBar3.desc)
+	self:Unregister(actionbars.actionBar4.desc)
+	self:Unregister(actionbars.actionBar5.desc)
+	self:Unregister(actionbars.actionBar6.desc)
+	self:Unregister(actionbars.actionBar7.desc)
+	self:Unregister(actionbars.actionBar8.desc)
+	self:Unregister(actionbars.petActionBar.desc)
+	self:Unregister(actionbars.stanceBar.desc)
+	self:Unregister(unitframes.playerFrame.desc)
+	self:Unregister(unitframes.targetFrame.desc)
+	self:Unregister(unitframes.focusFrame.desc)
+	self:Unregister(unitframes.petFrame.desc)
+	self:Unregister(unitframes.raidFrame.desc)
+	self:Unregister(unitframes.partyFrame.desc)
+	self:Unregister(unitframes.bossFrames.desc)
+	self:Unregister(interface.objectiveTracker.desc)
+	self:UnregisterChat(interface.chatFrame.desc)
+	self:Unregister(interface.minimap.desc)
+	self:Unregister(interface.bagsBar.desc)
+	self:Unregister(interface.microMenu.desc)
+	self:Unregister(interface.buffFrame.desc)
+	self:Unregister(interface.debuffFrame.desc)
+	self:Unregister(interface.experienceBar.desc)
+	self:Unregister(interface.personResource.desc)
+	self:Unregister(interface.damageMeter.desc)
 end
 
 function DinksUI:Register(frameKey, conditionalMacro)
